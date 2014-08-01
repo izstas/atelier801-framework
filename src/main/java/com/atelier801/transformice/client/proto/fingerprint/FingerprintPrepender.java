@@ -2,7 +2,6 @@ package com.atelier801.transformice.client.proto.fingerprint;
 
 import java.util.List;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
@@ -15,6 +14,9 @@ public final class FingerprintPrepender extends MessageToMessageEncoder<ByteBuf>
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        out.add(Unpooled.wrappedBuffer(generator.next(ctx.alloc()), msg.retain()));
+        ByteBuf fingerprint = generator.next(ctx.alloc());
+
+        out.add(ctx.alloc().compositeBuffer(2).addComponents(fingerprint, msg.retain())
+                .writerIndex(fingerprint.readableBytes() + msg.readableBytes()));
     }
 }
