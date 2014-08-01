@@ -3,6 +3,7 @@ package com.atelier801.transformice.client.proto.packet.in;
 import java.util.List;
 import com.google.common.base.Objects;
 
+// Valid for 1.180
 @InboundLegacyPacket.Code(major = 26, minor = 8)
 public final class IPLoginSuccess implements InboundLegacyPacket {
     private final String mouseName;
