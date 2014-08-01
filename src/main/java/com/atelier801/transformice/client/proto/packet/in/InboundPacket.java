@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 public interface InboundPacket {
-    /**
+    /*
      * This is a marker interface.
      * Implementers must have a constructor which accepts a TransformiceByteBuf.
      */

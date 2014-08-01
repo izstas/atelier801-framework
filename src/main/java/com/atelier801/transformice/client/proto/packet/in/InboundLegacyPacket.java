@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 public interface InboundLegacyPacket {
-    /**
+    /*
      * This is a marker interface.
      * Implementers must have a constructor which accepts a List<String>.
      */
