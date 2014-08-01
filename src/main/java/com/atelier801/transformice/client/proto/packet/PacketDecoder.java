@@ -33,7 +33,7 @@ public final class PacketDecoder extends MessageToMessageDecoder<ByteBuf> {
 
             InboundPacket.Code packetCode = packet.getAnnotation(InboundPacket.Code.class);
 
-            final Constructor<? extends InboundPacket> packetConstructor;
+            Constructor<? extends InboundPacket> packetConstructor;
             try {
                 packetConstructor = packet.getConstructor(TransformiceByteBuf.class);
             }

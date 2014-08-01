@@ -34,7 +34,7 @@ public final class LegacyPacketDecoder extends MessageToMessageDecoder<IPWrapper
 
             InboundLegacyPacket.Code packetCode = packet.getAnnotation(InboundLegacyPacket.Code.class);
 
-            final Constructor<? extends InboundLegacyPacket> packetConstructor;
+            Constructor<? extends InboundLegacyPacket> packetConstructor;
             try {
                 packetConstructor = packet.getConstructor(List.class);
             }
