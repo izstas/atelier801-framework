@@ -6,9 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
+import com.atelier801.transformice.client.proto.packet.TribulleContext;
 
 public interface OutboundTribullePacket {
     void write(TransformiceByteBuf out);
+
+    default OutboundTribullePacket context(TribulleContext ctx) {
+        return this;
+    }
 
 
     @Target(ElementType.TYPE)

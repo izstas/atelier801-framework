@@ -19,9 +19,12 @@ import com.atelier801.transformice.client.proto.packet.in.InboundTribullePacket;
 public final class TribullePacketDecoder extends MessageToMessageDecoder<IPWrapperTribulle> {
     private static final Logger logger = LoggerFactory.getLogger(TribullePacketDecoder.class);
 
+    private final TribulleContext context;
     private final Map<Integer, Function<TransformiceByteBuf, InboundTribullePacket>> packets;
 
-    public TribullePacketDecoder(Function<String, Integer> labelResolver) {
+    public TribullePacketDecoder(TribulleContext context, Function<String, Integer> labelResolver) {
+        this.context = context;
+
         ImmutableMap.Builder<Integer, Function<TransformiceByteBuf, InboundTribullePacket>> packetsBuilder =
                 ImmutableMap.builder();
 
@@ -73,6 +76,6 @@ public final class TribullePacketDecoder extends MessageToMessageDecoder<IPWrapp
             return;
         }
 
-        out.add(packets.get(msg.getCode()).apply(new TransformiceByteBuf(msg.getBody())));
+        out.add(packets.get(msg.getCode()).apply(new TransformiceByteBuf(msg.getBody())).context(context));
     }
 }

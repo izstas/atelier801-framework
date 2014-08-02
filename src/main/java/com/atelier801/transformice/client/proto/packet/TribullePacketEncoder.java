@@ -19,9 +19,12 @@ import com.atelier801.transformice.client.proto.packet.out.OutboundTribullePacke
 public final class TribullePacketEncoder extends MessageToMessageEncoder<OutboundTribullePacket> {
     private static final Logger logger = LoggerFactory.getLogger(TribullePacketEncoder.class);
 
+    private final TribulleContext context;
     private final Map<Class<? extends OutboundTribullePacket>, Integer> codes;
 
-    public TribullePacketEncoder(Function<String, Integer> labelResolver) {
+    public TribullePacketEncoder(TribulleContext context, Function<String, Integer> labelResolver) {
+        this.context = context;
+
         ImmutableMap.Builder<Class<? extends OutboundTribullePacket>, Integer> codesBuilder = ImmutableMap.builder();
 
         Reflections reflections = ReflectionsUtil.forPackage(OutboundTribullePacket.class.getPackage().getName());
@@ -53,7 +56,7 @@ public final class TribullePacketEncoder extends MessageToMessageEncoder<Outboun
         }
 
         ByteBuf buf = ctx.alloc().buffer();
-        msg.write(new TransformiceByteBuf(buf));
+        msg.context(context).write(new TransformiceByteBuf(buf));
 
         out.add(new OPWrapperTribulle(codes.get(msg.getClass()), buf));
     }
