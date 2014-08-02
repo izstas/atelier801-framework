@@ -1,5 +1,8 @@
 package com.atelier801.transformice.client.proto;
 
+import java.util.List;
+import java.util.function.Supplier;
+import com.google.common.collect.ImmutableList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.WrappedByteBuf;
 import io.netty.util.CharsetUtil;
@@ -24,5 +27,22 @@ public class TransformiceByteBuf extends WrappedByteBuf {
         readBytes(data);
 
         return new String(data, CharsetUtil.UTF_8);
+    }
+
+    public <T> List<T> readList(int length, Supplier<T> reader) {
+        if (length < 0) {
+            throw new IllegalArgumentException("length must not be negative");
+        }
+
+        if (length == 0) {
+            return ImmutableList.of();
+        }
+
+        ImmutableList.Builder<T> builder = ImmutableList.builder();
+        for (int i = 0; i < length; i++) {
+            builder.add(reader.get());
+        }
+
+        return builder.build();
     }
 }
