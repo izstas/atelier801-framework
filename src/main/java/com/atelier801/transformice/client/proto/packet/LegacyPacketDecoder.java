@@ -2,10 +2,10 @@ package com.atelier801.transformice.client.proto.packet;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.ImmutableMap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -20,11 +20,11 @@ public final class LegacyPacketDecoder extends MessageToMessageDecoder<IPWrapper
     private static final Logger logger = LoggerFactory.getLogger(LegacyPacketDecoder.class);
     private static final Splitter splitter = Splitter.on('\1');
 
-    private final Table<Integer, Integer, Function<List<String>, InboundLegacyPacket>> packets;
+    private final Map<String, Function<List<String>, InboundLegacyPacket>> packets;
 
     public LegacyPacketDecoder() {
-        ImmutableTable.Builder<Integer, Integer, Function<List<String>, InboundLegacyPacket>> packetsBuilder =
-                ImmutableTable.builder();
+        ImmutableMap.Builder<String, Function<List<String>, InboundLegacyPacket>> packetsBuilder =
+                ImmutableMap.builder();
 
         Reflections reflections = ReflectionsUtil.forPackage(InboundLegacyPacket.class.getPackage().getName());
         for (Class<? extends InboundLegacyPacket> packet : reflections.getSubTypesOf(InboundLegacyPacket.class)) {
@@ -44,7 +44,7 @@ public final class LegacyPacketDecoder extends MessageToMessageDecoder<IPWrapper
                 continue;
             }
 
-            packetsBuilder.put(packetCode.major(), packetCode.minor(), list -> {
+            packetsBuilder.put("" + (char) packetCode.major() + (char) packetCode.minor(), list -> {
                 try {
                     return packetConstructor.newInstance(list);
                 }
@@ -64,15 +64,12 @@ public final class LegacyPacketDecoder extends MessageToMessageDecoder<IPWrapper
     protected void decode(ChannelHandlerContext ctx, IPWrapperLegacy msg, List<Object> out) throws Exception {
         List<String> list = splitter.splitToList(msg.getPayload());
 
-        int majorCode = list.get(0).charAt(0);
-        int minorCode = list.get(0).charAt(1);
-
-        if (!packets.contains(majorCode, minorCode)) {
+        if (!packets.containsKey(list.get(0))) {
             logger.trace("Packet code ({}, {}) is not known; packet has been discarded ({} elements)",
-                    majorCode, minorCode, list.size() - 1);
+                    (int) list.get(0).charAt(0), (int) list.get(0).charAt(1), list.size() - 1);
             return;
         }
 
-        out.add(packets.get(majorCode, minorCode).apply(list.subList(1, list.size() - 1)));
+        out.add(packets.get(list.get(0)).apply(list.subList(1, list.size() - 1)));
     }
 }
