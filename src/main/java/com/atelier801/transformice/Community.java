@@ -4,29 +4,32 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A enum-like class representing Transformice communities.
+ */
 public final class Community {
-    public static final Community EN = new Community(0, "en");
-    public static final Community FR = new Community(1, "fr");
-    public static final Community RU = new Community(2, "ru");
-    public static final Community BR = new Community(3, "br");
-    public static final Community ES = new Community(4, "es");
-    public static final Community CN = new Community(5, "cn");
-    public static final Community TR = new Community(6, "tr");
-    public static final Community VK = new Community(7, "vk");
-    public static final Community PL = new Community(8, "pl");
-    public static final Community HU = new Community(9, "hu");
-    public static final Community NL = new Community(10, "nl");
-    public static final Community RO = new Community(11, "ro");
-    public static final Community ID = new Community(12, "id");
-    public static final Community DE = new Community(13, "de");
-    public static final Community E2 = new Community(14, "e2");
-    public static final Community AR = new Community(15, "ar");
-    public static final Community PH = new Community(16, "ph");
-    public static final Community LT = new Community(17, "lt");
-    public static final Community JP = new Community(18, "jp");
-    public static final Community FI = new Community(20, "fi");
-    public static final Community HE = new Community(26, "he");
-    public static final Community IT = new Community(27, "it");
+    public static final Community EN = new Community(0, "EN");
+    public static final Community FR = new Community(1, "FR");
+    public static final Community RU = new Community(2, "RU");
+    public static final Community BR = new Community(3, "BR");
+    public static final Community ES = new Community(4, "ES");
+    public static final Community CN = new Community(5, "CN");
+    public static final Community TR = new Community(6, "TR");
+    public static final Community VK = new Community(7, "VK");
+    public static final Community PL = new Community(8, "PL");
+    public static final Community HU = new Community(9, "HU");
+    public static final Community NL = new Community(10, "NL");
+    public static final Community RO = new Community(11, "RO");
+    public static final Community ID = new Community(12, "ID");
+    public static final Community DE = new Community(13, "DE");
+    public static final Community E2 = new Community(14, "E2");
+    public static final Community AR = new Community(15, "AR");
+    public static final Community PH = new Community(16, "PH");
+    public static final Community LT = new Community(17, "LT");
+    public static final Community JP = new Community(18, "JP");
+    public static final Community FI = new Community(20, "FI");
+    public static final Community HE = new Community(26, "HE");
+    public static final Community IT = new Community(27, "IT");
 
     private static final Map<Integer, Community> byId = new HashMap<>();
 
@@ -49,7 +52,8 @@ public final class Community {
         return id;
     }
 
-    public String getName() {
+    @Override
+    public String toString() {
         return name;
     }
 
