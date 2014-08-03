@@ -70,6 +70,6 @@ public final class LegacyPacketDecoder extends MessageToMessageDecoder<IPWrapper
             return;
         }
 
-        out.add(packets.get(list.get(0)).apply(list.subList(1, list.size() - 1)));
+        out.add(packets.get(list.get(0)).apply(list.subList(1, list.size())));
     }
 }
