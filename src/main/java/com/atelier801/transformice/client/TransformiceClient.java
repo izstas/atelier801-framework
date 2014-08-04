@@ -135,6 +135,28 @@ public final class TransformiceClient implements Transformice {
     }
 
 
+    /* TRIBE */
+    private final TribeClient tribe = new TribeClient();
+
+    @Override
+    public Tribe tribe() {
+        return tribe;
+    }
+
+    private final class TribeClient implements Tribe {
+        private int channelId = -1;
+
+        @Override
+        public void sendMessage(String message) {
+            checkNotNull(message, "message");
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(channelId != -1, "Tribe channel is not defined");
+
+            channel.writeAndFlush(new OPChannelMessage(channelId, message));
+        }
+    }
+
+
     /* EVENTS */
     private final Collection<Subscriber<? super Event>> subscribers = new CopyOnWriteArrayList<>();
     private final Observable<Event> observable = Observable.create((Observable.OnSubscribe<Event>) subscribers::add);
@@ -210,6 +232,25 @@ public final class TransformiceClient implements Transformice {
 
             logger.info("Connecting to the satellite server at {}", satelliteAddress);
             triggerNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTING));
+        });
+
+        putPacketHandler(IPChannelEnter.class, p -> {
+            if (p.getName().charAt(0) == '~') {
+                tribe.channelId = p.getId();
+            }
+        });
+
+        putPacketHandler(IPChannelQuit.class, p -> {
+            if (p.getId() == tribe.channelId) {
+                tribe.channelId = -1;
+            }
+        });
+
+        putPacketHandler(IPChannelMessage.class, p -> {
+            if (p.getChannelId() == tribe.channelId) {
+                triggerNext(new TribeMessageEvent(tribe, p.getSender(),
+                        Community.valueOf(p.getSenderCommunity()), p.getMessage()));
+            }
         });
     }
 

@@ -22,6 +22,11 @@ public interface Transformice {
     String getClientMouseName();
 
 
+    Tribe tribe();
+    interface Tribe extends Chat {
+    }
+
+
     /**
      * Represents the state of main Transformice connection.
      */
