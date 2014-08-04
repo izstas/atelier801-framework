@@ -24,10 +24,12 @@ public interface Transformice {
 
     Tribe tribe();
     interface Tribe extends Chat {
+        Observable<RoomChangeEvent> enterHouse();
     }
 
     Room room();
     interface Room extends Chat {
+        String getName();
     }
 
     /**

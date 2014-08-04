@@ -154,6 +154,14 @@ public final class TransformiceClient implements Transformice {
 
             channel.writeAndFlush(new OPChannelMessage(channelId, message));
         }
+
+        @Override
+        public Observable<RoomChangeEvent> enterHouse() {
+            // TODO: Check tribe
+
+            channel.writeAndFlush(new OPTribeHouse());
+            return observable.ofType(RoomChangeEvent.class).filter(e -> e.getRoom().charAt(1) == '\3');
+        }
     }
 
 
@@ -166,6 +174,15 @@ public final class TransformiceClient implements Transformice {
     }
 
     private final class RoomClient implements Room {
+        private String name;
+
+        @Override
+        public String getName() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+            return name;
+        }
+
         @Override
         public void sendMessage(String message) {
             checkNotNull(message, "message");
@@ -270,6 +287,10 @@ public final class TransformiceClient implements Transformice {
                 triggerNext(new TribeMessageEvent(tribe, p.getSender(),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage()));
             }
+        });
+
+        putPacketHandler(IPRoom.class, p -> {
+            triggerNext(new RoomChangeEvent(room.name = p.getRoom()));
         });
 
         putPacketHandler(IPRoomMessage.class, p -> {
