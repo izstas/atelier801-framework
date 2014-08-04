@@ -157,6 +157,25 @@ public final class TransformiceClient implements Transformice {
     }
 
 
+    /* ROOM */
+    private final RoomClient room = new RoomClient();
+
+    @Override
+    public Room room() {
+        return room;
+    }
+
+    private final class RoomClient implements Room {
+        @Override
+        public void sendMessage(String message) {
+            checkNotNull(message, "message");
+            checkState(satelliteState == SatelliteState.CONNECTED, "Illegal satellite state: %s", satelliteState);
+
+            satelliteChannel.writeAndFlush(new OPRoomMessage(message));
+        }
+    }
+
+
     /* EVENTS */
     private final Collection<Subscriber<? super Event>> subscribers = new CopyOnWriteArrayList<>();
     private final Observable<Event> observable = Observable.create((Observable.OnSubscribe<Event>) subscribers::add);
@@ -251,6 +270,11 @@ public final class TransformiceClient implements Transformice {
                 triggerNext(new TribeMessageEvent(tribe, p.getSender(),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage()));
             }
+        });
+
+        putPacketHandler(IPRoomMessage.class, p -> {
+            triggerNext(new RoomMessageEvent(room, p.getSender(),
+                    Community.valueOf(p.getSenderCommunity()), p.getMessage()));
         });
     }
 

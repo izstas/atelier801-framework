@@ -26,6 +26,9 @@ public interface Transformice {
     interface Tribe extends Chat {
     }
 
+    Room room();
+    interface Room extends Chat {
+    }
 
     /**
      * Represents the state of main Transformice connection.
