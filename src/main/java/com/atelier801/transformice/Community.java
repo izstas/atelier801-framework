@@ -8,6 +8,8 @@ import java.util.Map;
  * A enum-like class representing Transformice communities.
  */
 public final class Community {
+    private static final Map<Integer, Community> byId = new HashMap<>();
+
     public static final Community EN = new Community(0, "EN");
     public static final Community FR = new Community(1, "FR");
     public static final Community RU = new Community(2, "RU");
@@ -30,8 +32,6 @@ public final class Community {
     public static final Community FI = new Community(20, "FI");
     public static final Community HE = new Community(26, "HE");
     public static final Community IT = new Community(27, "IT");
-
-    private static final Map<Integer, Community> byId = new HashMap<>();
 
 
     private final int id;
