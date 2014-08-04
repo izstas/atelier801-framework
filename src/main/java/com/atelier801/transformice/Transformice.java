@@ -12,9 +12,14 @@ public interface Transformice {
     Observable<Event> events();
 
     State getState();
+    SatelliteState getSatelliteState();
+
+    void close();
 
     void changeCommunity(Community community);
     Observable<LoginEvent> logIn(String username, Optional<String> password, Optional<String> room);
+
+    String getClientMouseName();
 
 
     /**
@@ -25,6 +30,16 @@ public interface Transformice {
         CONNECTED,
         LOGGING_IN,
         LOGGED_IN,
+        CLOSING,
+        CLOSED
+    }
+
+    /**
+     * Represents the state of satellite Transformice connection.
+     */
+    enum SatelliteState {
+        CONNECTING,
+        CONNECTED,
         CLOSING,
         CLOSED
     }
