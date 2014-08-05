@@ -22,6 +22,7 @@ import rx.Observable;
 import rx.Subscriber;
 
 import com.atelier801.transformice.*;
+import com.atelier801.transformice.client.proto.data.*;
 import com.atelier801.transformice.client.proto.packet.in.*;
 import com.atelier801.transformice.client.proto.packet.out.*;
 import com.atelier801.transformice.event.*;
@@ -148,6 +149,8 @@ public final class TransformiceClient implements Transformice {
         private String name;
         private String greeting;
         private int houseMap;
+        private Pool<Integer, TribeRankImpl, DTribeRank> ranks =
+                new Pool<>(id -> new TribeRankImpl(TransformiceClient.this, id), DTribeRank::getId);
 
         private int channelId = -1;
 
@@ -167,6 +170,13 @@ public final class TransformiceClient implements Transformice {
         public int getHouseMap() {
             checkState(id != -1, "Not in tribe");
             return houseMap;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Collection<TribeRank> getRanks() {
+            checkState(id != -1, "Not in tribe");
+            return (Collection) ranks.objects();
         }
 
         @Override
@@ -319,6 +329,7 @@ public final class TransformiceClient implements Transformice {
             tribe.name = p.getName();
             tribe.greeting = p.getGreeting();
             tribe.houseMap = p.getHouseMap();
+            tribe.ranks.replace(p.getRanks());
 
             triggerNext(new TribeChangeEvent());
         });

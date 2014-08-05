@@ -1,5 +1,6 @@
 package com.atelier801.transformice;
 
+import java.util.Collection;
 import java.util.Optional;
 import rx.Observable;
 
@@ -27,6 +28,7 @@ public interface Transformice {
         String getName();
         String getGreeting();
         int getHouseMap();
+        Collection<TribeRank> getRanks();
 
         Observable<RoomChangeEvent> enterHouse();
     }
