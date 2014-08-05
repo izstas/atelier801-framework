@@ -136,14 +136,14 @@ public final class TransformiceClient implements Transformice {
 
 
     /* TRIBE */
-    private final TribeClient tribe = new TribeClient();
+    private final TribeImpl tribe = new TribeImpl();
 
     @Override
     public Tribe tribe() {
         return tribe;
     }
 
-    private final class TribeClient implements Tribe {
+    private final class TribeImpl implements Tribe {
         private int id = -1;
         private String name;
         private String greeting;
@@ -191,14 +191,14 @@ public final class TransformiceClient implements Transformice {
 
 
     /* ROOM */
-    private final RoomClient room = new RoomClient();
+    private final RoomImpl room = new RoomImpl();
 
     @Override
     public Room room() {
         return room;
     }
 
-    private final class RoomClient implements Room {
+    private final class RoomImpl implements Room {
         private String name;
 
         @Override
