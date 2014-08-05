@@ -29,6 +29,7 @@ public interface Transformice {
         String getGreeting();
         int getHouseMap();
         Collection<TribeRank> getRanks();
+        Collection<TribeMember> getMembers();
 
         Observable<RoomChangeEvent> enterHouse();
     }

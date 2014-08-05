@@ -137,20 +137,22 @@ public final class TransformiceClient implements Transformice {
 
 
     /* TRIBE */
-    private final TribeImpl tribe = new TribeImpl();
+    final TribeImpl tribe = new TribeImpl();
 
     @Override
     public Tribe tribe() {
         return tribe;
     }
 
-    private final class TribeImpl implements Tribe {
+    final class TribeImpl implements Tribe {
         private int id = -1;
         private String name;
         private String greeting;
         private int houseMap;
-        private Pool<Integer, TribeRankImpl, DTribeRank> ranks =
+        Pool<Integer, TribeRankImpl, DTribeRank> ranks =
                 new Pool<>(id -> new TribeRankImpl(TransformiceClient.this, id), DTribeRank::getId);
+        Pool<Integer, TribeMemberImpl, DTribeMember> members =
+                new Pool<>(id -> new TribeMemberImpl(TransformiceClient.this, id), DTribeMember::getId);
 
         private int channelId = -1;
 
@@ -177,6 +179,13 @@ public final class TransformiceClient implements Transformice {
         public Collection<TribeRank> getRanks() {
             checkState(id != -1, "Not in tribe");
             return (Collection) ranks.objects();
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Collection<TribeMember> getMembers() {
+            checkState(id != -1, "Not in tribe");
+            return (Collection) members.objects();
         }
 
         @Override
@@ -324,12 +333,19 @@ public final class TransformiceClient implements Transformice {
             }
         });
 
+
         putPacketHandler(IPTribe.class, p -> {
             tribe.id = p.getId();
             tribe.name = p.getName();
             tribe.greeting = p.getGreeting();
             tribe.houseMap = p.getHouseMap();
             tribe.ranks.replace(p.getRanks());
+
+            channel.writeAndFlush(new OPTribeMembersRequest());
+        });
+
+        putPacketHandler(IPTribeMembers.class, p -> {
+            tribe.members.replace(p.getMembers());
 
             triggerNext(new TribeChangeEvent());
         });
