@@ -24,6 +24,10 @@ public interface Transformice {
 
     Tribe tribe();
     interface Tribe extends Chat {
+        String getName();
+        String getGreeting();
+        int getHouseMap();
+
         Observable<RoomChangeEvent> enterHouse();
     }
 

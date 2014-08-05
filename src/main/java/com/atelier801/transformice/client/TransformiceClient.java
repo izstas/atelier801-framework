@@ -144,12 +144,36 @@ public final class TransformiceClient implements Transformice {
     }
 
     private final class TribeClient implements Tribe {
+        private int id = -1;
+        private String name;
+        private String greeting;
+        private int houseMap;
+
         private int channelId = -1;
+
+        @Override
+        public String getName() {
+            checkState(id != -1, "Not in tribe");
+            return name;
+        }
+
+        @Override
+        public String getGreeting() {
+            checkState(id != -1, "Not in tribe");
+            return greeting;
+        }
+
+        @Override
+        public int getHouseMap() {
+            checkState(id != -1, "Not in tribe");
+            return houseMap;
+        }
 
         @Override
         public void sendMessage(String message) {
             checkNotNull(message, "message");
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(id != -1, "Not in tribe");
             checkState(channelId != -1, "Tribe channel is not defined");
 
             channel.writeAndFlush(new OPChannelMessage(channelId, message));
@@ -157,7 +181,8 @@ public final class TransformiceClient implements Transformice {
 
         @Override
         public Observable<RoomChangeEvent> enterHouse() {
-            // TODO: Check tribe
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(id != -1, "Not in tribe");
 
             channel.writeAndFlush(new OPTribeHouse());
             return observable.ofType(RoomChangeEvent.class).filter(e -> e.getRoom().charAt(1) == '\3');
@@ -287,6 +312,15 @@ public final class TransformiceClient implements Transformice {
                 triggerNext(new TribeMessageEvent(tribe, p.getSender(),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage()));
             }
+        });
+
+        putPacketHandler(IPTribe.class, p -> {
+            tribe.id = p.getId();
+            tribe.name = p.getName();
+            tribe.greeting = p.getGreeting();
+            tribe.houseMap = p.getHouseMap();
+
+            triggerNext(new TribeChangeEvent());
         });
 
         putPacketHandler(IPRoom.class, p -> {
