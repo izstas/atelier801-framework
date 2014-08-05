@@ -387,10 +387,10 @@ public final class TransformiceClient implements Transformice {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, IPConnect msg) throws Exception {
+            ctx.writeAndFlush(new OPClient());
+
             logger.info("Connection to the main server has been established");
             triggerNext(new StateChangeEvent(state = State.CONNECTED));
-
-            ctx.writeAndFlush(new OPClient());
         }
     }
 
