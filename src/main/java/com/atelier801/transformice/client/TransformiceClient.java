@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -348,6 +349,36 @@ public final class TransformiceClient implements Transformice {
             tribe.members.replace(p.getMembers());
 
             triggerNext(new TribeChangeEvent());
+        });
+
+        Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
+            TribeMemberImpl m = tribe.members.replace(d);
+
+            triggerNext(new TribeMemberConnectEvent(m, d.getLocations().get(0).toLocation().getGame()));
+        };
+
+        putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
+        putPacketHandler(IPTribeMemberConnectBatch.class, p -> p.getMembers().forEach(tribeMemberConnectHandler));
+
+        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gd) -> {
+            Location.Game g = Location.Game.valueOf(gd);
+            TribeMemberImpl m = tribe.members.get(id);
+            m.removeLocation(g);
+
+            triggerNext(new TribeMemberDisconnectEvent(m, g));
+        };
+
+        putPacketHandler(IPTribeMemberDisconnect.class,
+                p -> tribeMemberDisconnectHandler.accept(p.getId(), p.getGame()));
+        putPacketHandler(IPTribeMemberDisconnectBatch.class,
+                p -> p.getIds().forEach(id -> tribeMemberDisconnectHandler.accept(id, p.getGame())));
+
+        putPacketHandler(IPTribeMemberLocation.class, p -> {
+            Location l = p.getLocation().toLocation();
+            TribeMemberImpl m = tribe.members.get(p.getId());
+            m.replaceLocation(l);
+
+            triggerNext(new TribeMemberLocationChangeEvent(m, l));
         });
 
         putPacketHandler(IPRoom.class, p -> {

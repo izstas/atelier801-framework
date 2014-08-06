@@ -59,4 +59,13 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     public List<Location> getLocations() {
         return Collections.unmodifiableList(locations);
     }
+
+    void replaceLocation(Location location) {
+        locations.removeIf(l -> l.getGame() == location.getGame());
+        locations.add(location);
+    }
+
+    void removeLocation(Location.Game game) {
+        locations.removeIf(l -> l.getGame() == game);
+    }
 }
