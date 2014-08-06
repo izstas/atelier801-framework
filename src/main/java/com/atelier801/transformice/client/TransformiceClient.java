@@ -374,11 +374,13 @@ public final class TransformiceClient implements Transformice {
                 p -> p.getIds().forEach(id -> tribeMemberDisconnectHandler.accept(id, p.getGame())));
 
         putPacketHandler(IPTribeMemberLocation.class, p -> {
-            Location l = p.getLocation().toLocation();
-            TribeMemberImpl m = tribe.members.get(p.getId());
-            m.replaceLocation(l);
+            TribeMemberImpl member = tribe.members.get(p.getId());
+            if (member != null) {
+                Location l = p.getLocation().toLocation();
+                member.replaceLocation(l);
 
-            triggerNext(new TribeMemberLocationChangeEvent(m, l));
+                triggerNext(new TribeMemberLocationChangeEvent(member, l));
+            }
         });
 
         putPacketHandler(IPRoom.class, p -> {
