@@ -26,15 +26,17 @@ final class Pool<K, V extends Pooled<D>, D> {
         return pool.get(key);
     }
 
-    void replace(D data) {
+    V replace(D data) {
         V object = pool.computeIfAbsent(keyFromData.apply(data), valueFromKey);
         object.update(data);
         objects.add(object);
+        return object;
     }
 
-    void replace(Collection<D> data) {
+    Collection<V> replace(Collection<D> data) {
         objects.clear();
         data.forEach(this::replace);
+        return objects();
     }
 
     void remove(K key) {
