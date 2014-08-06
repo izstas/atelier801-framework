@@ -12,7 +12,7 @@ public final class DTribeMember {
     private final int rankId;
     private final int joinTime;
     private final int lastOnlineTime;
-    private final List<DLocation> onlineLocations;
+    private final List<DLocation> locations;
 
     public DTribeMember(TransformiceByteBuf in) {
         id = in.readInt();
@@ -21,7 +21,7 @@ public final class DTribeMember {
         rankId = in.readInt();
         joinTime = in.readInt();
         lastOnlineTime = in.readInt();
-        onlineLocations = in.readList(in.readShort(), DLocation::new);
+        locations = in.readList(in.readShort(), DLocation::new);
     }
 
     public int getId() {
@@ -44,8 +44,8 @@ public final class DTribeMember {
         return lastOnlineTime;
     }
 
-    public List<DLocation> getOnlineLocations() {
-        return onlineLocations;
+    public List<DLocation> getLocations() {
+        return locations;
     }
 
     @Override
@@ -56,7 +56,7 @@ public final class DTribeMember {
                 .add("rankId", rankId)
                 .add("joinTime", joinTime)
                 .add("lastOnlineTime", lastOnlineTime)
-                .add("onlineLocations", onlineLocations)
+                .add("locations", locations)
                 .toString();
     }
 }

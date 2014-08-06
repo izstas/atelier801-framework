@@ -2,12 +2,14 @@ package com.atelier801.transformice.client;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.atelier801.transformice.Location;
 import com.atelier801.transformice.TribeMember;
 import com.atelier801.transformice.TribeRank;
+import com.atelier801.transformice.client.proto.data.DLocation;
 import com.atelier801.transformice.client.proto.data.DTribeMember;
 
 final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
@@ -17,7 +19,7 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     private TribeRankImpl rank;
     private LocalDateTime joinTime;
     private LocalDateTime lastOnlineTime;
-    private List<Location> onlineLocations;
+    private List<Location> locations;
 
     public TribeMemberImpl(TransformiceClient transformice, int id) {
         this.transformice = transformice;
@@ -30,9 +32,7 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         rank = transformice.tribe.ranks.get(data.getRankId());
         joinTime = LocalDateTime.ofEpochSecond(data.getJoinTime() * 60, 0, ZoneOffset.UTC);
         lastOnlineTime = LocalDateTime.ofEpochSecond(data.getLastOnlineTime() * 60, 0, ZoneOffset.UTC);
-        onlineLocations = data.getOnlineLocations().stream()
-                .map(d -> new Location(Location.Game.valueOf(d.getGame()), d.getRoom()))
-                .collect(Collectors.toList());
+        locations = data.getLocations().stream().map(DLocation::toLocation).collect(Collectors.toList());
     }
 
     @Override
@@ -56,7 +56,7 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     }
 
     @Override
-    public List<Location> getOnlineLocations() {
-        return onlineLocations;
+    public List<Location> getLocations() {
+        return Collections.unmodifiableList(locations);
     }
 }

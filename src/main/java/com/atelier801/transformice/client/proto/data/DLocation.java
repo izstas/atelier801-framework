@@ -2,6 +2,7 @@ package com.atelier801.transformice.client.proto.data;
 
 import com.google.common.base.Objects;
 
+import com.atelier801.transformice.Location;
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
 // Valid for 1.180
@@ -28,5 +29,9 @@ public final class DLocation {
                 .add("game", game)
                 .add("room", room)
                 .toString();
+    }
+
+    public Location toLocation() {
+        return new Location(Location.Game.valueOf(game), room);
     }
 }
