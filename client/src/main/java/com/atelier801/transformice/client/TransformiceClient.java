@@ -352,20 +352,22 @@ public final class TransformiceClient implements Transformice {
         });
 
         Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
-            TribeMemberImpl m = tribe.members.replace(d);
+            TribeMemberImpl member = tribe.members.replace(d);
 
-            triggerNext(new TribeMemberConnectEvent(m, d.getLocations().get(0).toLocation().getGame()));
+            triggerNext(new TribeMemberConnectEvent(member, d.getLocations().get(0).toLocation().getGame()));
         };
 
         putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
         putPacketHandler(IPTribeMemberConnectBatch.class, p -> p.getMembers().forEach(tribeMemberConnectHandler));
 
-        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gd) -> {
-            Location.Game g = Location.Game.valueOf(gd);
-            TribeMemberImpl m = tribe.members.get(id);
-            m.removeLocation(g);
+        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gId) -> {
+            TribeMemberImpl member = tribe.members.get(id);
+            if (member != null) {
+                Location.Game g = Location.Game.valueOf(gId);
+                member.removeLocation(g);
 
-            triggerNext(new TribeMemberDisconnectEvent(m, g));
+                triggerNext(new TribeMemberDisconnectEvent(member, g));
+            }
         };
 
         putPacketHandler(IPTribeMemberDisconnect.class,
