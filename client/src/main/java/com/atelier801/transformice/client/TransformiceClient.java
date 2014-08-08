@@ -329,7 +329,10 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPChannelMessage.class, p -> {
             if (p.getChannelId() == tribe.channelId) {
-                triggerNext(new TribeMessageEvent(tribe, TransformiceUtil.normalizeMouseName(p.getSender()),
+                triggerNext(new TribeMessageEvent(tribe,
+                        tribe.members.objects().stream()
+                                .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
+                        TransformiceUtil.normalizeMouseName(p.getSender()),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage()));
             }
         });
@@ -374,6 +377,28 @@ public final class TransformiceClient implements Transformice {
                 p -> tribeMemberDisconnectHandler.accept(p.getId(), p.getGame()));
         putPacketHandler(IPTribeMemberDisconnectBatch.class,
                 p -> p.getIds().forEach(id -> tribeMemberDisconnectHandler.accept(id, p.getGame())));
+
+        putPacketHandler(IPTribeMemberJoin.class, p -> {
+            TribeMemberImpl member = tribe.members.replace(p.getMember());
+
+            triggerNext(new TribeMemberJoinEvent(member));
+        });
+
+        putPacketHandler(IPTribeMemberLeave.class, p -> {
+            TribeMemberImpl member = tribe.members.get(p.getId());
+            tribe.members.remove(p.getId());
+
+            triggerNext(new TribeMemberLeaveEvent(member));
+        });
+
+        putPacketHandler(IPTribeMemberKick.class, p -> {
+            TribeMemberImpl member = tribe.members.get(p.getId());
+            tribe.members.remove(p.getId());
+
+            triggerNext(new TribeMemberKickEvent(member,
+                    tribe.members.objects().stream()
+                            .filter(m -> m.getName().equalsIgnoreCase(p.getKicker())).findAny().orElse(null)));
+        });
 
         putPacketHandler(IPTribeMemberLocation.class, p -> {
             TribeMemberImpl member = tribe.members.get(p.getId());
