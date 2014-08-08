@@ -1,6 +1,6 @@
 package com.atelier801.transformice.client.proto.packet.out;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
@@ -21,7 +21,7 @@ public final class OPRoomMessage implements OutboundPacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("message", message)
                 .toString();
     }

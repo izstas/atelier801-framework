@@ -1,7 +1,7 @@
 package com.atelier801.transformice.client.proto.packet.out;
 
 import java.util.List;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 // Valid for 1.180
 @OutboundLegacyPacket.Code(major = 26, minor = 2)
@@ -13,6 +13,6 @@ public final class OPPing implements OutboundLegacyPacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).toString();
+        return MoreObjects.toStringHelper(this).toString();
     }
 }

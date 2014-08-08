@@ -1,6 +1,6 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
-import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreMoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 import com.atelier801.transformice.client.proto.data.DTribeMember;
@@ -20,7 +20,7 @@ public final class IPTribeMemberJoin implements InboundTribullePacket {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
+        return MoreMoreObjects.toStringHelper(this)
                 .add("member", member)
                 .toString();
     }

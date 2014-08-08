@@ -1,7 +1,7 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
 import java.util.List;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 import com.atelier801.transformice.client.proto.data.DTribeRank;
@@ -47,7 +47,7 @@ public final class IPTribe implements InboundTribullePacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("name", name)
                 .add("greeting", greeting)

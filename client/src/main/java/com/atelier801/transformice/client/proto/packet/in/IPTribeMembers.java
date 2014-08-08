@@ -1,7 +1,7 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
 import java.util.List;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 import com.atelier801.transformice.client.proto.data.DTribeMember;
@@ -23,7 +23,7 @@ public final class IPTribeMembers extends InboundReferencingTribullePacket<OPTri
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("reference", reference)
                 .add("members", members)
                 .toString();

@@ -3,7 +3,7 @@ package com.atelier801.transformice.client.proto.packet.out;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
@@ -40,7 +40,7 @@ public final class OPConnect implements OutboundPacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("version", version)
                 .add("key", key)
                 .toString();

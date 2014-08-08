@@ -1,7 +1,7 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
 import java.util.List;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 // Valid for 1.180
 @InboundLegacyPacket.Code(major = 26, minor = 8)
@@ -24,7 +24,7 @@ public final class IPLoginSuccess implements InboundLegacyPacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("mouseName", mouseName)
                 .add("mouseId", mouseId)
                 .toString();

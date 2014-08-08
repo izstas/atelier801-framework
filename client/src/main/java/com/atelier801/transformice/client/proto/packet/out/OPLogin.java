@@ -3,7 +3,7 @@ package com.atelier801.transformice.client.proto.packet.out;
 import java.util.Optional;
 import java.util.Random;
 import com.google.common.base.Charsets;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
@@ -45,7 +45,7 @@ public final class OPLogin implements OutboundPacket {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("username", username)
                 .add("password", password.isPresent() ? "Optional[**HIDDEN**]" : "Optional.empty")
                 .add("room", room)

@@ -1,7 +1,7 @@
 package com.atelier801.transformice.client.proto.data;
 
 import java.util.List;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
@@ -39,7 +39,7 @@ public final class DTribeRank {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("name", name)
                 .add("position", position)
