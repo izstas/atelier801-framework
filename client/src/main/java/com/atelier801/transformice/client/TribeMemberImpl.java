@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.atelier801.transformice.Location;
+import com.atelier801.transformice.TransformiceUtil;
 import com.atelier801.transformice.TribeMember;
 import com.atelier801.transformice.TribeRank;
 import com.atelier801.transformice.client.proto.data.DLocation;
@@ -28,7 +29,7 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
 
     @Override
     public void update(DTribeMember data) {
-        name = data.getName();
+        name = TransformiceUtil.normalizeMouseName(data.getName());
         rank = transformice.tribe.ranks.get(data.getRankId());
         joinTime = LocalDateTime.ofEpochSecond(data.getJoinTime() * 60, 0, ZoneOffset.UTC);
         lastOnlineTime = LocalDateTime.ofEpochSecond(data.getLastOnlineTime() * 60, 0, ZoneOffset.UTC);

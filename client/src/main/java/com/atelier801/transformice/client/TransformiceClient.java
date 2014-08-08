@@ -329,7 +329,7 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPChannelMessage.class, p -> {
             if (p.getChannelId() == tribe.channelId) {
-                triggerNext(new TribeMessageEvent(tribe, p.getSender(),
+                triggerNext(new TribeMessageEvent(tribe, TransformiceUtil.normalizeMouseName(p.getSender()),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage()));
             }
         });
