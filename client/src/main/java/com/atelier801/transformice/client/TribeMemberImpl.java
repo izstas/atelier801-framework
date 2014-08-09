@@ -36,6 +36,10 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         locations = data.getLocations().stream().map(DLocation::toLocation).collect(Collectors.toList());
     }
 
+    public int getId() {
+        return id;
+    }
+
     @Override
     public String getName() {
         return name;
@@ -72,5 +76,10 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
 
     void removeLocation(Location.Game game) {
         locations.removeIf(l -> l.getGame() == game);
+    }
+
+    @Override
+    public void changeRank(TribeRank rank) {
+        transformice.tribe.changeMemberRank(this, (TribeRankImpl) rank);
     }
 }

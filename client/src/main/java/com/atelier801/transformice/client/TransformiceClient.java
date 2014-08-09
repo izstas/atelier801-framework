@@ -216,6 +216,14 @@ public final class TransformiceClient implements Transformice {
             channel.writeAndFlush(new OPTribeHouse());
             return observable.ofType(RoomChangeEvent.class).filter(e -> e.getRoom().charAt(1) == '\3');
         }
+
+        void changeMemberRank(TribeMemberImpl member, TribeRankImpl rank) {
+            checkNotNull(rank, "rank");
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(id != -1, "Not in tribe");
+
+            channel.writeAndFlush(new OPTribeMemberRank(member.getId(), rank.getId()));
+        }
     }
 
 

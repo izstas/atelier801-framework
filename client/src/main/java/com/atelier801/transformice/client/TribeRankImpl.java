@@ -20,6 +20,10 @@ final class TribeRankImpl implements TribeRank, Pooled<DTribeRank> {
         position = data.getPosition();
     }
 
+    public int getId() {
+        return id;
+    }
+
     @Override
     public String getName() {
         return name;

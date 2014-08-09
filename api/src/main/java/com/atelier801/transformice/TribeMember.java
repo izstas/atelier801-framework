@@ -12,4 +12,6 @@ public interface TribeMember {
     LocalDateTime getJoinTime();
     LocalDateTime getLastOnlineTime();
     List<Location> getLocations();
+
+    void changeRank(TribeRank rank);
 }
