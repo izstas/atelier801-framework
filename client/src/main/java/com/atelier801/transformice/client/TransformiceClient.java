@@ -136,6 +136,15 @@ public final class TransformiceClient implements Transformice {
         return clientMouseName;
     }
 
+    @Override
+    public void sendPrivateMessage(String recipient, String message) {
+        checkNotNull(recipient, "recipient");
+        checkNotNull(message, "message");
+        checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+        channel.writeAndFlush(new OPPrivateMessage(recipient, message));
+    }
+
 
     /* TRIBE */
     final TribeImpl tribe = new TribeImpl();
@@ -337,6 +346,13 @@ public final class TransformiceClient implements Transformice {
             }
         });
 
+        putPacketHandler(IPPrivateMessage.class, p -> {
+            if (!p.isOutgoing()) {
+                triggerNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
+                        TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
+                        p.getMessage()));
+            }
+        });
 
         putPacketHandler(IPTribe.class, p -> {
             tribe.id = p.getId();

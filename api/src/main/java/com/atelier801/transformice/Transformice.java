@@ -22,6 +22,7 @@ public interface Transformice {
 
     String getClientMouseName();
 
+    void sendPrivateMessage(String recipient, String message);
 
     Tribe tribe();
     interface Tribe extends Chat {
