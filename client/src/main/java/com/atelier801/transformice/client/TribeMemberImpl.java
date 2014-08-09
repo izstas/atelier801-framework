@@ -46,6 +46,10 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         return rank;
     }
 
+    void setRank(TribeRankImpl rank) {
+        this.rank = rank;
+    }
+
     @Override
     public LocalDateTime getJoinTime() {
         return joinTime;

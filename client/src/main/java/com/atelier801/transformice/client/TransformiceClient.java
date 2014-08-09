@@ -416,6 +416,16 @@ public final class TransformiceClient implements Transformice {
                             .filter(m -> m.getName().equalsIgnoreCase(p.getKicker())).findAny().orElse(null)));
         });
 
+        putPacketHandler(IPTribeMemberRank.class, p -> {
+            TribeMemberImpl member = tribe.members.get(p.getId());
+            if (member != null) {
+                TribeRankImpl r = tribe.ranks.get(p.getRankId());
+                member.setRank(r);
+
+                triggerNext(new TribeMemberRankChangeEvent(member, r));
+            }
+        });
+
         putPacketHandler(IPTribeMemberLocation.class, p -> {
             TribeMemberImpl member = tribe.members.get(p.getId());
             if (member != null) {
