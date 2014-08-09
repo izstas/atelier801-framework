@@ -5,8 +5,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 import com.atelier801.transformice.client.proto.fingerprint.*;
 import com.atelier801.transformice.client.proto.packet.*;
@@ -41,7 +39,7 @@ final class TransformiceChannelInitializer extends ChannelInitializer<Channel> {
         ch.pipeline().addLast("dec-packet-tribulle",
                 new TribullePacketDecoder(tribulleContext, data.getTribulleCodes()::get));
 
-        ch.pipeline().addLast("handler-logging", new LoggingHandler(TransformiceClient.class, LogLevel.TRACE));
+        ch.pipeline().addLast("handler-logging", LoggingHandler.INSTANCE);
         ch.pipeline().addLast("handler-fingerprint", new FingerprintInitPacketHandler(fingerprintGenerator));
         ch.pipeline().addLast(handlers);
     }
