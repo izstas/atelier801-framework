@@ -120,6 +120,8 @@ public final class TransformiceClient implements Transformice {
         checkState(state == State.CONNECTED, "Illegal state: %s", state);
 
         channel.writeAndFlush(new OPLogin(username, password, room));
+
+        logger.info("Attempting to log in as {}", username);
         triggerNext(new StateChangeEvent(state = State.LOGGING_IN));
         return observable.ofType(LoginEvent.class);
     }
@@ -297,22 +299,27 @@ public final class TransformiceClient implements Transformice {
             clientMouseId = p.getMouseId();
             clientMouseName = p.getMouseName();
 
+            logger.info("Successfully logged in as {}", p.getMouseName());
             triggerNext(new StateChangeEvent(state = State.LOGGED_IN));
             triggerNext(new LoginSuccessEvent(p.getMouseName()));
         });
 
         putPacketHandler(IPLoginFailure.class, p -> {
-            triggerNext(new StateChangeEvent(state = State.CONNECTED));
+            LoginFailureEvent.Reason r;
             switch (p.getReason()) {
                 case 1:
-                    triggerNext(new LoginFailureEvent(LoginFailureEvent.Reason.INVALID));
+                    r = LoginFailureEvent.Reason.INVALID;
                     break;
                 case 2:
-                    triggerNext(new LoginFailureEvent(LoginFailureEvent.Reason.ALREADY_CONNECTED));
+                    r = LoginFailureEvent.Reason.ALREADY_CONNECTED;
                     break;
                 default:
-                    triggerNext(new LoginFailureEvent(LoginFailureEvent.Reason.UNKNOWN));
+                    r = LoginFailureEvent.Reason.UNKNOWN;
             }
+
+            logger.info("Failed to log in: {} (#{})", r, p.getReason());
+            triggerNext(new StateChangeEvent(state = State.CONNECTED));
+            triggerNext(new LoginFailureEvent(r));
         });
 
         putPacketHandler(IPSatellite.class, p -> {
