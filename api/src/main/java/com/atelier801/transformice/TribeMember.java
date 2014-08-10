@@ -10,7 +10,7 @@ public interface TribeMember {
     String getName();
     TribeRank getRank();
     LocalDateTime getJoinTime();
-    LocalDateTime getLastOnlineTime();
+    LocalDateTime getLastConnectTime();
     List<Location> getLocations();
 
     void changeRank(TribeRank rank);

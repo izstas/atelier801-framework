@@ -11,7 +11,7 @@ public final class DTribeMember {
     private final String name;
     private final int rankId;
     private final int joinTime;
-    private final int lastOnlineTime;
+    private final int lastConnectTime;
     private final List<DLocation> locations;
 
     public DTribeMember(TransformiceByteBuf in) {
@@ -20,7 +20,7 @@ public final class DTribeMember {
         name = in.readUTFBytes(20);
         rankId = in.readInt();
         joinTime = in.readInt();
-        lastOnlineTime = in.readInt();
+        lastConnectTime = in.readInt();
         locations = in.readList(in.readShort(), DLocation::new);
     }
 
@@ -40,8 +40,8 @@ public final class DTribeMember {
         return joinTime;
     }
 
-    public int getLastOnlineTime() {
-        return lastOnlineTime;
+    public int getLastConnectTime() {
+        return lastConnectTime;
     }
 
     public List<DLocation> getLocations() {
@@ -55,7 +55,7 @@ public final class DTribeMember {
                 .add("name", name)
                 .add("rankId", rankId)
                 .add("joinTime", joinTime)
-                .add("lastOnlineTime", lastOnlineTime)
+                .add("lastConnectTime", lastConnectTime)
                 .add("locations", locations)
                 .toString();
     }
