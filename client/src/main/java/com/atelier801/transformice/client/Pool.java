@@ -8,8 +8,8 @@ import java.util.function.Function;
 import com.google.common.collect.MapMaker;
 
 final class Pool<K, V extends Pooled<D>, D> {
-    private final Map<K, V> pool = new MapMaker().weakValues().makeMap();
-    private final Collection<V> objects = new CopyOnWriteArraySet<>();
+    private final Map<K, V> pooled = new MapMaker().weakValues().makeMap();
+    private final Collection<V> valid = new CopyOnWriteArraySet<>();
     private final Function<K, V> valueFromKey;
     private final Function<D, K> keyFromData;
 
@@ -18,28 +18,33 @@ final class Pool<K, V extends Pooled<D>, D> {
         this.keyFromData = keyFromData;
     }
 
-    Collection<V> objects() {
-        return Collections.unmodifiableCollection(objects);
+    Collection<V> valid() {
+        return Collections.unmodifiableCollection(valid);
     }
 
     V get(K key) {
-        return pool.get(key);
+        return pooled.computeIfAbsent(key, valueFromKey);
+    }
+
+    V getValid(K key) {
+        V object = pooled.get(key);
+        return object != null && valid.contains(object) ? object : null;
     }
 
     V replace(D data) {
-        V object = pool.computeIfAbsent(keyFromData.apply(data), valueFromKey);
+        V object = pooled.computeIfAbsent(keyFromData.apply(data), valueFromKey);
         object.update(data);
-        objects.add(object);
+        valid.add(object);
         return object;
     }
 
-    Collection<V> replace(Collection<D> data) {
-        objects.clear();
+    Collection<V> replaceAll(Collection<D> data) {
+        valid.clear();
         data.forEach(this::replace);
-        return objects();
+        return valid();
     }
 
-    void remove(K key) {
-        objects.remove(pool.get(key));
+    void invalidate(K key) {
+        valid.remove(pooled.get(key));
     }
 }
