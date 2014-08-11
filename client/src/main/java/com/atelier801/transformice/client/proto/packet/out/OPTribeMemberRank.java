@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
+// Valid for 1.180
 @OutboundTribullePacket.Label("ST_AffecterRang")
 public final class OPTribeMemberRank extends OutboundReferencedTribullePacket {
     private final int id;
