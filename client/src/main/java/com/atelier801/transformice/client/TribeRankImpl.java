@@ -1,13 +1,20 @@
 package com.atelier801.transformice.client;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import com.atelier801.transformice.TribePermission;
 import com.atelier801.transformice.TribeRank;
 import com.atelier801.transformice.client.proto.data.DTribeRank;
 
 final class TribeRankImpl implements TribeRank, Pooled<DTribeRank> {
-    private final TransformiceClient transformice;
-    private final int id;
+    final TransformiceClient transformice;
+    final int id;
     private String name;
     private int position;
+    private Set<TribePermission> permissions;
 
     TribeRankImpl(TransformiceClient transformice, int id) {
         this.transformice = transformice;
@@ -18,15 +25,18 @@ final class TribeRankImpl implements TribeRank, Pooled<DTribeRank> {
     public void update(DTribeRank data) {
         name = data.getName();
         position = data.getPosition();
-    }
-
-    public int getId() {
-        return id;
+        permissions = IntStream.range(0, data.getPermissions().size()).filter(data.getPermissions()::get)
+                .mapToObj(TribePermission::valueOf).collect(Collectors.toSet());
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Set<TribePermission> getPermissions() {
+        return Collections.unmodifiableSet(permissions);
     }
 
     @Override

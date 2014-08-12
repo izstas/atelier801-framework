@@ -236,7 +236,7 @@ public final class TransformiceClient implements Transformice {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
 
-            channel.writeAndFlush(new OPTribeMemberRank(member.getId(), rank.getId()));
+            channel.writeAndFlush(new OPTribeMemberRank(member.getId(), rank.id));
             return observable.ofType(TribeMemberRankChangeEvent.class).filter(e -> e.getMember() == member).take(1);
         }
     }
