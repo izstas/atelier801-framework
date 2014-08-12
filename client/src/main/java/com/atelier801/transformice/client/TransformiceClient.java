@@ -367,7 +367,7 @@ public final class TransformiceClient implements Transformice {
         putPacketHandler(IPChannelMessage.class, p -> {
             if (p.getChannelId() == tribe.channelId) {
                 triggerNext(new TribeMessageEvent(tribe,
-                        tribe.members.objects().stream()
+                        tribe.members.valid().stream()
                                 .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
                         TransformiceUtil.normalizeMouseName(p.getSender()),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<")));
@@ -385,13 +385,13 @@ public final class TransformiceClient implements Transformice {
             tribe.name = p.getName();
             tribe.greeting = p.getGreeting();
             tribe.houseMap = p.getHouseMap();
-            tribe.ranks.replace(p.getRanks());
+            tribe.ranks.replaceAll(p.getRanks());
 
             channel.writeAndFlush(new OPTribeMembersRequest());
         });
 
         putPacketHandler(IPTribeMembers.class, p -> {
-            tribe.members.replace(p.getMembers());
+            tribe.members.replaceAll(p.getMembers());
 
             triggerNext(new TribeChangeEvent());
         });
@@ -428,17 +428,17 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPTribeMemberLeave.class, p -> {
             TribeMemberImpl member = tribe.members.get(p.getId());
-            tribe.members.remove(p.getId());
+            tribe.members.invalidate(p.getId());
 
             triggerNext(new TribeMemberLeaveEvent(member));
         });
 
         putPacketHandler(IPTribeMemberKick.class, p -> {
             TribeMemberImpl member = tribe.members.get(p.getId());
-            tribe.members.remove(p.getId());
+            tribe.members.invalidate(p.getId());
 
             triggerNext(new TribeMemberKickEvent(member,
-                    tribe.members.objects().stream()
+                    tribe.members.valid().stream()
                             .filter(m -> m.getName().equalsIgnoreCase(p.getKicker())).findAny().orElse(null)));
         });
 
