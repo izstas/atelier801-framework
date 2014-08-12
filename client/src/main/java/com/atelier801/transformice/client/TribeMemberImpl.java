@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import rx.Observable;
 
 import com.atelier801.transformice.Location;
 import com.atelier801.transformice.TransformiceUtil;
@@ -12,17 +13,19 @@ import com.atelier801.transformice.TribeMember;
 import com.atelier801.transformice.TribeRank;
 import com.atelier801.transformice.client.proto.data.DLocation;
 import com.atelier801.transformice.client.proto.data.DTribeMember;
+import com.atelier801.transformice.event.TribeMemberKickEvent;
+import com.atelier801.transformice.event.TribeMemberRankChangeEvent;
 
 final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
-    private final TransformiceClient transformice;
-    private final int id;
+    final TransformiceClient transformice;
+    final int id;
     private String name;
     private TribeRankImpl rank;
     private LocalDateTime joinTime;
     private LocalDateTime lastConnectTime;
     private List<Location> locations;
 
-    public TribeMemberImpl(TransformiceClient transformice, int id) {
+    TribeMemberImpl(TransformiceClient transformice, int id) {
         this.transformice = transformice;
         this.id = id;
     }
@@ -34,10 +37,6 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         joinTime = LocalDateTime.ofEpochSecond(data.getJoinTime() * 60, 0, ZoneOffset.UTC);
         lastConnectTime = LocalDateTime.ofEpochSecond(data.getLastConnectTime() * 60, 0, ZoneOffset.UTC);
         locations = data.getLocations().stream().map(DLocation::toLocation).collect(Collectors.toList());
-    }
-
-    public int getId() {
-        return id;
     }
 
     @Override
@@ -79,7 +78,12 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     }
 
     @Override
-    public void changeRank(TribeRank rank) {
-        transformice.tribe.changeMemberRank(this, (TribeRankImpl) rank);
+    public Observable<TribeMemberRankChangeEvent> changeRank(TribeRank rank) {
+        return transformice.tribe.changeMemberRank(this, (TribeRankImpl) rank);
+    }
+
+    @Override
+    public Observable<TribeMemberKickEvent> kick() {
+        return transformice.tribe.kickMember(this);
     }
 }
