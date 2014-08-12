@@ -385,9 +385,11 @@ public final class TransformiceClient implements Transformice {
         });
 
         putPacketHandler(IPPrivateMessage.class, p -> {
-            triggerNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
-                    TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
-                    p.getMessage().replace("&lt;", "<")));
+            if (!p.isOutgoing()) {
+                triggerNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
+                        TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
+                        p.getMessage().replace("&lt;", "<")));
+            }
         });
 
         putPacketHandler(IPTribe.class, p -> {

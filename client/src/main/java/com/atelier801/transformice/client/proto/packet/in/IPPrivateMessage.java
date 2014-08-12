@@ -10,12 +10,13 @@ public final class IPPrivateMessage implements InboundTribullePacket {
     private final String sender;
     private final String message;
     private final int senderCommunity;
+    private final boolean outgoing;
 
     public IPPrivateMessage(TransformiceByteBuf in) {
         sender = in.readUTF();
         message = in.readUTF();
         senderCommunity = in.readByte();
-        in.readBoolean();
+        outgoing = in.readBoolean();
     }
 
     public String getSender() {
@@ -30,12 +31,17 @@ public final class IPPrivateMessage implements InboundTribullePacket {
         return senderCommunity;
     }
 
+    public boolean isOutgoing() {
+        return outgoing;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("sender", sender)
                 .add("message", message)
                 .add("senderCommunity", senderCommunity)
+                .add("outgoing", outgoing)
                 .toString();
     }
 }
