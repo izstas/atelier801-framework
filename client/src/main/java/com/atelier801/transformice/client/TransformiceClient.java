@@ -170,42 +170,51 @@ public final class TransformiceClient implements Transformice {
 
         @Override
         public String getName() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
+
             return name;
         }
 
         @Override
         public String getGreeting() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
+
             return greeting;
         }
 
         @Override
         public int getHouseMap() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
+
             return houseMap;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public Collection<TribeRank> getRanks() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
-            return (Collection) ranks.objects();
+
+            return (Collection) ranks.valid();
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public Collection<TribeMember> getMembers() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
-            return (Collection) members.objects();
+
+            return (Collection) members.valid();
         }
 
         @Override
         public void sendMessage(String message) {
             checkNotNull(message, "message");
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
-            checkState(id != -1, "Not in tribe");
-            checkState(channelId != -1, "Tribe channel is not defined");
+            checkState(channelId != -1, "Not in tribe channel");
 
             channel.writeAndFlush(new OPChannelMessage(channelId, message.replace("<", "&lt;")));
         }
@@ -216,15 +225,19 @@ public final class TransformiceClient implements Transformice {
             checkState(id != -1, "Not in tribe");
 
             channel.writeAndFlush(new OPTribeHouse());
-            return observable.ofType(RoomChangeEvent.class).filter(e -> e.getRoom().charAt(1) == '\3');
+            return observable.ofType(RoomChangeEvent.class).filter(e -> e.getRoom().charAt(1) == '\3').take(1);
         }
 
-        void changeMemberRank(TribeMemberImpl member, TribeRankImpl rank) {
+        Observable<TribeMemberRankChangeEvent> changeMemberRank(TribeMemberImpl member, TribeRankImpl rank) {
+            checkNotNull(member, "member");
+            checkArgument(members.valid().contains(member), "member is not valid");
             checkNotNull(rank, "rank");
+            checkArgument(ranks.valid().contains(rank), "rank is not valid");
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(id != -1, "Not in tribe");
 
             channel.writeAndFlush(new OPTribeMemberRank(member.getId(), rank.getId()));
+            return observable.ofType(TribeMemberRankChangeEvent.class).filter(e -> e.getMember() == member).take(1);
         }
     }
 
