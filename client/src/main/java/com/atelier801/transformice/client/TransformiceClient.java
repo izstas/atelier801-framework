@@ -144,7 +144,7 @@ public final class TransformiceClient implements Transformice {
         checkNotNull(message, "message");
         checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
 
-        channel.writeAndFlush(new OPPrivateMessage(recipient, message.replace("<", "&lt;")));
+        channel.writeAndFlush(new OPPrivateMessage(recipient, message.replace("&", "&amp;").replace("<", "&lt;")));
     }
 
 
@@ -216,7 +216,7 @@ public final class TransformiceClient implements Transformice {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(channelId != -1, "Not in tribe channel");
 
-            channel.writeAndFlush(new OPChannelMessage(channelId, message.replace("<", "&lt;")));
+            channel.writeAndFlush(new OPChannelMessage(channelId, message.replace("&", "&amp;").replace("<", "&lt;")));
         }
 
         @Override
@@ -275,7 +275,7 @@ public final class TransformiceClient implements Transformice {
             checkNotNull(message, "message");
             checkState(satelliteState == SatelliteState.CONNECTED, "Illegal satellite state: %s", satelliteState);
 
-            satelliteChannel.writeAndFlush(new OPRoomMessage(message.replace("<", "&lt;")));
+            satelliteChannel.writeAndFlush(new OPRoomMessage(message.replace("&", "&amp;").replace("<", "&lt;")));
         }
     }
 
@@ -380,7 +380,7 @@ public final class TransformiceClient implements Transformice {
                         tribe.members.valid().stream()
                                 .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
                         TransformiceUtil.normalizeMouseName(p.getSender()),
-                        Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<")));
+                        Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
             }
         });
 
@@ -388,7 +388,7 @@ public final class TransformiceClient implements Transformice {
             if (!p.isOutgoing()) {
                 triggerNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
                         TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
-                        p.getMessage().replace("&lt;", "<")));
+                        p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
             }
         });
 
@@ -480,7 +480,7 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPRoomMessage.class, p -> {
             triggerNext(new RoomMessageEvent(room, p.getSender(),
-                    Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<")));
+                    Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
         });
     }
 
