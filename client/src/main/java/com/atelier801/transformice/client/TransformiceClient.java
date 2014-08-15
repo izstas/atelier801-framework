@@ -161,9 +161,9 @@ public final class TransformiceClient implements Transformice {
         private String name;
         private String greeting;
         private int houseMap;
-        Pool<Integer, TribeRankImpl, DTribeRank> ranks =
+        final Pool<Integer, TribeRankImpl, DTribeRank> ranks =
                 new Pool<>(id -> new TribeRankImpl(TransformiceClient.this, id), DTribeRank::getId);
-        Pool<Integer, TribeMemberImpl, DTribeMember> members =
+        final Pool<Integer, TribeMemberImpl, DTribeMember> members =
                 new Pool<>(id -> new TribeMemberImpl(TransformiceClient.this, id), DTribeMember::getId);
 
         private int channelId = -1;
@@ -409,7 +409,17 @@ public final class TransformiceClient implements Transformice {
         });
 
         Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
-            TribeMemberImpl member = tribe.members.replace(d);
+            // Workaround for what looks like a tribulle bug
+            TribeMemberImpl member = tribe.members.getValid(d.getId());
+            Collection<Location> locations = null;
+            if (member != null) {
+                locations = member.getLocations();
+            }
+
+            member = tribe.members.replace(d);
+            if (locations != null) {
+                locations.forEach(member::replaceLocation);
+            }
 
             triggerNext(new TribeMemberConnectEvent(member, d.getLocations().get(0).toLocation().getGame()));
         };
@@ -417,13 +427,13 @@ public final class TransformiceClient implements Transformice {
         putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
         putPacketHandler(IPTribeMemberConnectBatch.class, p -> p.getMembers().forEach(tribeMemberConnectHandler));
 
-        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gId) -> {
-            TribeMemberImpl member = tribe.members.get(id);
+        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gameId) -> {
+            TribeMemberImpl member = tribe.members.getValid(id);
             if (member != null) {
-                Location.Game g = Location.Game.valueOf(gId);
-                member.removeLocation(g);
+                Location.Game game = Location.Game.valueOf(gameId);
+                member.removeLocation(game);
 
-                triggerNext(new TribeMemberDisconnectEvent(member, g));
+                triggerNext(new TribeMemberDisconnectEvent(member, game));
             }
         };
 
@@ -439,38 +449,42 @@ public final class TransformiceClient implements Transformice {
         });
 
         putPacketHandler(IPTribeMemberLeave.class, p -> {
-            TribeMemberImpl member = tribe.members.get(p.getId());
-            tribe.members.invalidate(p.getId());
+            TribeMemberImpl member = tribe.members.getValid(p.getId());
+            if (member != null) {
+                tribe.members.invalidate(p.getId());
 
-            triggerNext(new TribeMemberLeaveEvent(member));
+                triggerNext(new TribeMemberLeaveEvent(member));
+            }
         });
 
         putPacketHandler(IPTribeMemberKick.class, p -> {
-            TribeMemberImpl member = tribe.members.get(p.getId());
-            tribe.members.invalidate(p.getId());
+            TribeMemberImpl member = tribe.members.getValid(p.getId());
+            if (member != null) {
+                tribe.members.invalidate(p.getId());
 
-            triggerNext(new TribeMemberKickEvent(member,
-                    tribe.members.valid().stream()
-                            .filter(m -> m.getName().equalsIgnoreCase(p.getKicker())).findAny().orElse(null)));
+                triggerNext(new TribeMemberKickEvent(member,
+                        tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getKicker()))
+                                .findAny().get()));
+            }
         });
 
         putPacketHandler(IPTribeMemberRank.class, p -> {
-            TribeMemberImpl member = tribe.members.get(p.getId());
+            TribeMemberImpl member = tribe.members.getValid(p.getId());
             if (member != null) {
-                TribeRankImpl r = tribe.ranks.get(p.getRankId());
-                member.setRank(r);
+                TribeRankImpl rank = tribe.ranks.get(p.getRankId());
+                member.setRank(rank);
 
-                triggerNext(new TribeMemberRankChangeEvent(member, r));
+                triggerNext(new TribeMemberRankChangeEvent(member, rank));
             }
         });
 
         putPacketHandler(IPTribeMemberLocation.class, p -> {
-            TribeMemberImpl member = tribe.members.get(p.getId());
+            TribeMemberImpl member = tribe.members.getValid(p.getId());
             if (member != null) {
-                Location l = p.getLocation().toLocation();
-                member.replaceLocation(l);
+                Location location = p.getLocation().toLocation();
+                member.replaceLocation(location);
 
-                triggerNext(new TribeMemberLocationChangeEvent(member, l));
+                triggerNext(new TribeMemberLocationChangeEvent(member, location));
             }
         });
 
