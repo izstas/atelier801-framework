@@ -141,7 +141,9 @@ public final class TransformiceClient implements Transformice {
     @Override
     public void sendPrivateMessage(String recipient, String message) {
         checkNotNull(recipient, "recipient");
+        checkArgument(!recipient.isEmpty(), "recipient is empty");
         checkNotNull(message, "message");
+        checkArgument(!message.isEmpty(), "message is empty");
         checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
 
         channel.writeAndFlush(new OPPrivateMessage(recipient, message.replace("&", "&amp;").replace("<", "&lt;")));
@@ -213,6 +215,7 @@ public final class TransformiceClient implements Transformice {
         @Override
         public void sendMessage(String message) {
             checkNotNull(message, "message");
+            checkArgument(!message.isEmpty(), "message is empty");
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(channelId != -1, "Not in tribe channel");
 
@@ -273,6 +276,7 @@ public final class TransformiceClient implements Transformice {
         @Override
         public void sendMessage(String message) {
             checkNotNull(message, "message");
+            checkArgument(!message.isEmpty(), "message is empty");
             checkState(satelliteState == SatelliteState.CONNECTED, "Illegal satellite state: %s", satelliteState);
 
             satelliteChannel.writeAndFlush(new OPRoomMessage(message.replace("&", "&amp;").replace("<", "&lt;")));
