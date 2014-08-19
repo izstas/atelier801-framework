@@ -412,6 +412,22 @@ public final class TransformiceClient implements Transformice {
             triggerNext(new TribeChangeEvent());
         });
 
+        putPacketHandler(IPTribeGreeting.class, p -> {
+            tribe.greeting = p.getGreeting();
+
+            triggerNext(new TribeGreetingChangeEvent(
+                    tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getChanger()))
+                            .findAny().get()));
+        });
+
+        putPacketHandler(IPTribeHouseMap.class, p -> {
+            tribe.houseMap = p.getHouseMap();
+
+            triggerNext(new TribeHouseMapChangeEvent(
+                    tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getChanger()))
+                            .findAny().get()));
+        });
+
         Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
             // Workaround for what looks like a tribulle bug
             TribeMemberImpl member = tribe.members.getValid(d.getId());
