@@ -12,9 +12,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.netflix.rxjava</groupId>
-      <artifactId>rxjava-core</artifactId>
-      <version>0.20.0</version>
+      <groupId>io.reactivex</groupId>
+      <artifactId>rxjava</artifactId>
+      <version>1.0.0-rc.3</version>
     </dependency>
   </dependencies>
 </project>
