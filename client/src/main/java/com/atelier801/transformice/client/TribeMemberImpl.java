@@ -73,8 +73,8 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         locations.add(location);
     }
 
-    void removeLocation(Location.Game game) {
-        locations.removeIf(l -> l.getGame() == game);
+    boolean removeLocation(Location.Game game) {
+        return locations.removeIf(l -> l.getGame() == game);
     }
 
     @Override

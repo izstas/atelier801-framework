@@ -465,9 +465,9 @@ public final class TransformiceClient implements Transformice {
             TribeMemberImpl member = tribe.members.getValid(id);
             if (member != null) {
                 Location.Game game = Location.Game.valueOf(gameId);
-                member.removeLocation(game);
-
-                emitNext(new TribeMemberDisconnectEvent(member, game));
+                if (member.removeLocation(game)) {
+                    emitNext(new TribeMemberDisconnectEvent(member, game));
+                }
             }
         };
 
