@@ -79,7 +79,7 @@ public final class TransformiceClient implements Transformice {
         channel.close();
 
         logger.info("Closing connection to the main server");
-        triggerNext(new StateChangeEvent(state = State.CLOSING));
+        emitNext(new StateChangeEvent(state = State.CLOSING));
     }
 
     private void satelliteClose(boolean abandon) {
@@ -97,7 +97,7 @@ public final class TransformiceClient implements Transformice {
 
                 logger.info("Closing connection to the satellite server at {}",
                         satelliteChannel.remoteAddress());
-                triggerNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CLOSING));
+                emitNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CLOSING));
             }
         }
     }
@@ -122,7 +122,7 @@ public final class TransformiceClient implements Transformice {
         channel.writeAndFlush(new OPLogin(username, password, room));
 
         logger.info("Attempting to log in as {}", username);
-        triggerNext(new StateChangeEvent(state = State.LOGGING_IN));
+        emitNext(new StateChangeEvent(state = State.LOGGING_IN));
         return observable.ofType(LoginEvent.class);
     }
 
@@ -286,21 +286,35 @@ public final class TransformiceClient implements Transformice {
 
     /* EVENTS */
     private final Collection<Subscriber<? super Event>> subscribers = new CopyOnWriteArrayList<>();
-    private final Observable<Event> observable = Observable.create((Observable.OnSubscribe<Event>) subscribers::add);
+    private final Observable<Event> observable = Observable.<Event>create(subscribers::add);
 
     @Override
     public Observable<Event> events() {
         return observable;
     }
 
-    private void triggerNext(Event evt) {
+    private void emitNext(Event evt) {
         subscribers.removeIf(Subscriber::isUnsubscribed);
-        subscribers.forEach(s -> s.onNext(evt));
+        subscribers.forEach(s -> {
+            try {
+                s.onNext(evt);
+            }
+            catch (Exception e) {
+                logger.warn("An unhandled exception has occurred while calling onNext on {}", s, e);
+            }
+        });
     }
 
-    private void triggerCompleted() {
+    private void emitCompleted() {
         subscribers.removeIf(Subscriber::isUnsubscribed);
-        subscribers.forEach(s -> s.onCompleted());
+        subscribers.forEach(s -> {
+            try {
+                s.onCompleted();
+            }
+            catch (Exception e) {
+                logger.warn("An unhandled exception has occurred while calling onCompleted on {}", s, e);
+            }
+        });
     }
 
 
@@ -327,8 +341,8 @@ public final class TransformiceClient implements Transformice {
             clientMouseName = p.getMouseName();
 
             logger.info("Successfully logged in as {}", p.getMouseName());
-            triggerNext(new StateChangeEvent(state = State.LOGGED_IN));
-            triggerNext(new LoginSuccessEvent(p.getMouseName()));
+            emitNext(new StateChangeEvent(state = State.LOGGED_IN));
+            emitNext(new LoginSuccessEvent(p.getMouseName()));
         });
 
         putPacketHandler(IPLoginFailure.class, p -> {
@@ -345,8 +359,8 @@ public final class TransformiceClient implements Transformice {
             }
 
             logger.info("Failed to log in: {} (#{})", r, p.getReason());
-            triggerNext(new StateChangeEvent(state = State.CONNECTED));
-            triggerNext(new LoginFailureEvent(r));
+            emitNext(new StateChangeEvent(state = State.CONNECTED));
+            emitNext(new LoginFailureEvent(r));
         });
 
         putPacketHandler(IPSatellite.class, p -> {
@@ -363,7 +377,7 @@ public final class TransformiceClient implements Transformice {
                     .channel();
 
             logger.info("Connecting to the satellite server at {}", satelliteAddress);
-            triggerNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTING));
+            emitNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTING));
         });
 
         putPacketHandler(IPChannelEnter.class, p -> {
@@ -380,7 +394,7 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPChannelMessage.class, p -> {
             if (p.getChannelId() == tribe.channelId) {
-                triggerNext(new TribeMessageEvent(tribe,
+                emitNext(new TribeMessageEvent(tribe,
                         tribe.members.valid().stream()
                                 .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
                         TransformiceUtil.normalizeMouseName(p.getSender()),
@@ -390,7 +404,7 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPPrivateMessage.class, p -> {
             if (!p.isOutgoing()) {
-                triggerNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
+                emitNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
                         TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
                         p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
             }
@@ -409,13 +423,13 @@ public final class TransformiceClient implements Transformice {
         putPacketHandler(IPTribeMembers.class, p -> {
             tribe.members.replaceAll(p.getMembers());
 
-            triggerNext(new TribeChangeEvent());
+            emitNext(new TribeChangeEvent());
         });
 
         putPacketHandler(IPTribeGreeting.class, p -> {
             tribe.greeting = p.getGreeting();
 
-            triggerNext(new TribeGreetingChangeEvent(
+            emitNext(new TribeGreetingChangeEvent(
                     tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getChanger()))
                             .findAny().get()));
         });
@@ -423,7 +437,7 @@ public final class TransformiceClient implements Transformice {
         putPacketHandler(IPTribeHouseMap.class, p -> {
             tribe.houseMap = p.getHouseMap();
 
-            triggerNext(new TribeHouseMapChangeEvent(
+            emitNext(new TribeHouseMapChangeEvent(
                     tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getChanger()))
                             .findAny().get()));
         });
@@ -441,7 +455,7 @@ public final class TransformiceClient implements Transformice {
                 locations.forEach(member::replaceLocation);
             }
 
-            triggerNext(new TribeMemberConnectEvent(member, d.getLocations().get(0).toLocation().getGame()));
+            emitNext(new TribeMemberConnectEvent(member, d.getLocations().get(0).toLocation().getGame()));
         };
 
         putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
@@ -453,7 +467,7 @@ public final class TransformiceClient implements Transformice {
                 Location.Game game = Location.Game.valueOf(gameId);
                 member.removeLocation(game);
 
-                triggerNext(new TribeMemberDisconnectEvent(member, game));
+                emitNext(new TribeMemberDisconnectEvent(member, game));
             }
         };
 
@@ -465,7 +479,7 @@ public final class TransformiceClient implements Transformice {
         putPacketHandler(IPTribeMemberJoin.class, p -> {
             TribeMemberImpl member = tribe.members.replace(p.getMember());
 
-            triggerNext(new TribeMemberJoinEvent(member));
+            emitNext(new TribeMemberJoinEvent(member));
         });
 
         putPacketHandler(IPTribeMemberLeave.class, p -> {
@@ -473,7 +487,7 @@ public final class TransformiceClient implements Transformice {
             if (member != null) {
                 tribe.members.invalidate(p.getId());
 
-                triggerNext(new TribeMemberLeaveEvent(member));
+                emitNext(new TribeMemberLeaveEvent(member));
             }
         });
 
@@ -482,7 +496,7 @@ public final class TransformiceClient implements Transformice {
             if (member != null) {
                 tribe.members.invalidate(p.getId());
 
-                triggerNext(new TribeMemberKickEvent(member,
+                emitNext(new TribeMemberKickEvent(member,
                         tribe.members.valid().stream().filter(m -> m.getName().equalsIgnoreCase(p.getKicker()))
                                 .findAny().get()));
             }
@@ -494,7 +508,7 @@ public final class TransformiceClient implements Transformice {
                 TribeRankImpl rank = tribe.ranks.get(p.getRankId());
                 member.setRank(rank);
 
-                triggerNext(new TribeMemberRankChangeEvent(member, rank));
+                emitNext(new TribeMemberRankChangeEvent(member, rank));
             }
         });
 
@@ -504,16 +518,16 @@ public final class TransformiceClient implements Transformice {
                 Location location = p.getLocation().toLocation();
                 member.replaceLocation(location);
 
-                triggerNext(new TribeMemberLocationChangeEvent(member, location));
+                emitNext(new TribeMemberLocationChangeEvent(member, location));
             }
         });
 
         putPacketHandler(IPRoom.class, p -> {
-            triggerNext(new RoomChangeEvent(room.name = p.getRoom()));
+            emitNext(new RoomChangeEvent(room.name = p.getRoom()));
         });
 
         putPacketHandler(IPRoomMessage.class, p -> {
-            triggerNext(new RoomMessageEvent(room, p.getSender(),
+            emitNext(new RoomMessageEvent(room, p.getSender(),
                     Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
         });
     }
@@ -563,9 +577,9 @@ public final class TransformiceClient implements Transformice {
                 logger.info("Connection to the main server has been closed UNEXPECTEDLY");
             }
 
-            triggerNext(new StateChangeEvent(state = State.CLOSED));
+            emitNext(new StateChangeEvent(state = State.CLOSED));
             satelliteClose(false);
-            eventLoopGroup.shutdownGracefully().addListener(f -> triggerCompleted());
+            eventLoopGroup.shutdownGracefully().addListener(f -> emitCompleted());
 
             ctx.fireChannelInactive();
         }
@@ -575,7 +589,7 @@ public final class TransformiceClient implements Transformice {
             ctx.writeAndFlush(new OPClient());
 
             logger.info("Connection to the main server has been established");
-            triggerNext(new StateChangeEvent(state = State.CONNECTED));
+            emitNext(new StateChangeEvent(state = State.CONNECTED));
         }
     }
 
@@ -604,7 +618,7 @@ public final class TransformiceClient implements Transformice {
                         ctx.channel().remoteAddress());
             }
 
-            triggerNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CLOSED));
+            emitNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CLOSED));
 
             ctx.fireChannelInactive();
         }
@@ -613,7 +627,7 @@ public final class TransformiceClient implements Transformice {
         protected void channelRead0(ChannelHandlerContext ctx, IPSatelliteConnect msg) throws Exception {
             logger.info("Connection to the satellite server at {} has been established",
                     ctx.channel().remoteAddress());
-            triggerNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTED));
+            emitNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTED));
         }
     }
 }
