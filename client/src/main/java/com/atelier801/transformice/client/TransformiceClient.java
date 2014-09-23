@@ -380,6 +380,10 @@ public final class TransformiceClient implements Transformice {
             emitNext(new SatelliteStateChangeEvent(satelliteState = SatelliteState.CONNECTING));
         });
 
+        putPacketHandler(IPSatellitePing.class, p -> {
+            satelliteChannel.writeAndFlush(new OPSatellitePing(p.getCounter()));
+        });
+
         putPacketHandler(IPChannelEnter.class, p -> {
             if (p.getName().charAt(0) == '~') {
                 tribe.channelId = p.getId();
