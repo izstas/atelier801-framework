@@ -86,7 +86,7 @@ public final class TransformiceClient implements Transformice {
         if (satelliteChannel != null && satelliteChannel.isOpen()) {
             if (abandon) {
                 satelliteChannel.pipeline().remove(SatelliteChannelHandler.class);
-                satelliteChannel.pipeline().remove(CommonChannelHandler.class);
+                //satelliteChannel.pipeline().remove(CommonChannelHandler.class); TODO: Find better workaround
                 satelliteChannel.close();
 
                 logger.info("Abandoning and closing connection to the satellite server at {}",
