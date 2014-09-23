@@ -539,7 +539,7 @@ public final class TransformiceClient implements Transformice {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            pingFuture = ctx.executor().scheduleWithFixedDelay(() -> ctx.writeAndFlush(new OPPing()),
+            pingFuture = ctx.executor().scheduleWithFixedDelay(() -> ctx.writeAndFlush(new OPKeepAlive()),
                     11, 11, TimeUnit.SECONDS);
 
             ctx.fireChannelActive();
