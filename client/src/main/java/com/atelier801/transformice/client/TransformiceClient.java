@@ -86,7 +86,7 @@ public final class TransformiceClient implements Transformice {
         if (satelliteChannel != null && satelliteChannel.isOpen()) {
             if (abandon) {
                 satelliteChannel.pipeline().remove(SatelliteChannelHandler.class);
-                //satelliteChannel.pipeline().remove(CommonChannelHandler.class); TODO: Find better workaround
+                satelliteChannel.pipeline().remove(CommonChannelHandler.class);
                 satelliteChannel.close();
 
                 logger.info("Abandoning and closing connection to the satellite server at {}",
@@ -539,21 +539,20 @@ public final class TransformiceClient implements Transformice {
 
     /* CHANNEL HANDLERS */
     private final class CommonChannelHandler extends SimpleChannelInboundHandler<Object> {
-        private Future<?> pingFuture;
+        private Future<?> keepAliveFuture;
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            pingFuture = ctx.executor().scheduleWithFixedDelay(() -> ctx.writeAndFlush(new OPKeepAlive()),
-                    11, 11, TimeUnit.SECONDS);
-
-            ctx.fireChannelActive();
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            keepAliveFuture = ctx.executor().scheduleWithFixedDelay(() -> {
+                if (ctx.channel().isActive()) {
+                    ctx.channel().writeAndFlush(new OPKeepAlive());
+                }
+            }, 11, 11, TimeUnit.SECONDS);
         }
 
         @Override
-        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            pingFuture.cancel(false);
-
-            ctx.fireChannelInactive();
+        public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+            keepAliveFuture.cancel(false);
         }
 
         @Override
@@ -561,6 +560,11 @@ public final class TransformiceClient implements Transformice {
             if (!callPacketHandler(msg.getClass(), msg)) {
                 ctx.fireChannelRead(msg);
             }
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            logger.warn("An unhandled exception has been caught", cause);
         }
     }
 
