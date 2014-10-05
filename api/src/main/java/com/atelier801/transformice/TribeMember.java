@@ -1,6 +1,6 @@
 package com.atelier801.transformice;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import rx.Observable;
 
@@ -13,8 +13,8 @@ import com.atelier801.transformice.event.TribeMemberRankChangeEvent;
 public interface TribeMember {
     String getName();
     TribeRank getRank();
-    LocalDateTime getJoinTime();
-    LocalDateTime getLastConnectTime();
+    Instant getJoiningTime();
+    Instant getLastConnectionTime();
     List<Location> getLocations();
 
     Observable<TribeMemberRankChangeEvent> changeRank(TribeRank rank);

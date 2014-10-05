@@ -5,13 +5,13 @@ import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.193
 public final class DTribeMember {
     private final int id;
     private final String name;
     private final int rankId;
-    private final int joinTime;
-    private final int lastConnectTime;
+    private final int joiningTime;
+    private final int lastConnectionTime;
     private final List<DLocation> locations;
 
     public DTribeMember(TransformiceByteBuf in) {
@@ -19,8 +19,8 @@ public final class DTribeMember {
         in.readInt();
         name = in.readUTFBytes(20);
         rankId = in.readInt();
-        joinTime = in.readInt();
-        lastConnectTime = in.readInt();
+        joiningTime = in.readInt();
+        lastConnectionTime = in.readInt();
         locations = in.readList(in.readShort(), DLocation::new);
     }
 
@@ -36,12 +36,12 @@ public final class DTribeMember {
         return rankId;
     }
 
-    public int getJoinTime() {
-        return joinTime;
+    public int getJoiningTime() {
+        return joiningTime;
     }
 
-    public int getLastConnectTime() {
-        return lastConnectTime;
+    public int getLastConnectionTime() {
+        return lastConnectionTime;
     }
 
     public List<DLocation> getLocations() {
@@ -54,8 +54,8 @@ public final class DTribeMember {
                 .add("id", id)
                 .add("name", name)
                 .add("rankId", rankId)
-                .add("joinTime", joinTime)
-                .add("lastConnectTime", lastConnectTime)
+                .add("joiningTime", joiningTime)
+                .add("lastConnectionTime", lastConnectionTime)
                 .add("locations", locations)
                 .toString();
     }

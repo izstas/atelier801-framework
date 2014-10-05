@@ -1,7 +1,6 @@
 package com.atelier801.transformice.client;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +20,8 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     final int id;
     private String name;
     private TribeRankImpl rank;
-    private LocalDateTime joinTime;
-    private LocalDateTime lastConnectTime;
+    private Instant joiningTime;
+    private Instant lastConnectionTime;
     private List<Location> locations;
 
     TribeMemberImpl(TransformiceClient transformice, int id) {
@@ -34,8 +33,8 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     public void update(DTribeMember data) {
         name = TransformiceUtil.normalizeMouseName(data.getName());
         rank = transformice.tribe.ranks.get(data.getRankId());
-        joinTime = LocalDateTime.ofEpochSecond(data.getJoinTime() * 60, 0, ZoneOffset.UTC);
-        lastConnectTime = LocalDateTime.ofEpochSecond(data.getLastConnectTime() * 60, 0, ZoneOffset.UTC);
+        joiningTime = Instant.ofEpochSecond(data.getJoiningTime() * 60);
+        lastConnectionTime = Instant.ofEpochSecond(data.getLastConnectionTime() * 60);
         locations = data.getLocations().stream().map(DLocation::toLocation).collect(Collectors.toList());
     }
 
@@ -54,13 +53,13 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     }
 
     @Override
-    public LocalDateTime getJoinTime() {
-        return joinTime;
+    public Instant getJoiningTime() {
+        return joiningTime;
     }
 
     @Override
-    public LocalDateTime getLastConnectTime() {
-        return lastConnectTime;
+    public Instant getLastConnectionTime() {
+        return lastConnectionTime;
     }
 
     @Override
