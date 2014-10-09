@@ -10,9 +10,9 @@
   <description>A framework for creating bots for Atelier801 games, primarily Transformice.</description>
 
   <scm>
-    <connection>scm:git:https://gitlab.com/izstas/atelier801-framework.git</connection>
-    <developerConnection>scm:git:ssh://git@gitlab.com:izstas/atelier801-framework.git</developerConnection>
-    <url>https://gitlab.com/izstas/atelier801-framework</url>
+    <connection>scm:git:https://github.com/izstas/atelier801-framework.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:izstas/atelier801-framework.git</developerConnection>
+    <url>https://github.com/izstas/atelier801-framework</url>
     <tag>HEAD</tag>
   </scm>
 
