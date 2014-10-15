@@ -49,7 +49,7 @@ public final class TransformiceClient implements Transformice {
         checkNotNull(data, "data");
 
         protoData = data;
-        eventLoopGroup = new NioEventLoopGroup();
+        eventLoopGroup = new NioEventLoopGroup(1);
         channel = new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
