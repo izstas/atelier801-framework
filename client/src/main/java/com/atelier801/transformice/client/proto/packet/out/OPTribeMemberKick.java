@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.196
 @OutboundTribullePacket.Label("ST_ExclureMembre")
 public final class OPTribeMemberKick extends OutboundReferencedTribullePacket {
     private final int id;
@@ -16,7 +16,6 @@ public final class OPTribeMemberKick extends OutboundReferencedTribullePacket {
     @Override
     public void write(TransformiceByteBuf out) {
         out.writeInt(referenceId);
-        out.writeInt(0);
         out.writeInt(id);
     }
 

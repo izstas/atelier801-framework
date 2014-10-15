@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.196
 @OutboundTribullePacket.Label("ST_AffecterRang")
 public final class OPTribeMemberRank extends OutboundReferencedTribullePacket {
     private final int id;
@@ -18,7 +18,6 @@ public final class OPTribeMemberRank extends OutboundReferencedTribullePacket {
     @Override
     public void write(TransformiceByteBuf out) {
         out.writeInt(referenceId);
-        out.writeInt(0);
         out.writeInt(id);
         out.writeInt(rankId);
     }
