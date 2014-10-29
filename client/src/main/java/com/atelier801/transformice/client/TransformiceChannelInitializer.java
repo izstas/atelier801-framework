@@ -28,16 +28,17 @@ final class TransformiceChannelInitializer extends ChannelInitializer<Channel> {
 
         ch.pipeline().addLast("enc-fingerprint", new FingerprintPrepender(fingerprintGenerator));
 
-        ch.pipeline().addLast("enc-packet", new PacketEncoder(data.getCodeTransforms()::get));
+        ch.pipeline().addLast("enc-packet",
+                new PacketEncoder(data.getPacketCodePreTransformer(), data.getPacketCodeDynamicTransformer()));
         ch.pipeline().addLast("dec-packet", new PacketDecoder());
 
         ch.pipeline().addLast("enc-packet-legacy", new LegacyPacketEncoder());
         ch.pipeline().addLast("dec-packet-legacy", new LegacyPacketDecoder());
 
         ch.pipeline().addLast("enc-packet-tribulle",
-                new TribullePacketEncoder(tribulleContext, data.getTribulleCodes()::get));
+                new TribullePacketEncoder(tribulleContext, data.getTribulleLabelResolver()));
         ch.pipeline().addLast("dec-packet-tribulle",
-                new TribullePacketDecoder(tribulleContext, data.getTribulleCodes()::get));
+                new TribullePacketDecoder(tribulleContext, data.getTribulleLabelResolver()));
 
         ch.pipeline().addLast("handler-logging", LoggingHandler.INSTANCE);
         ch.pipeline().addLast("handler-fingerprint", new FingerprintInitPacketHandler(fingerprintGenerator));

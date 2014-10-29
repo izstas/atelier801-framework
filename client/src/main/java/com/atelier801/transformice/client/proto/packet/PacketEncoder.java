@@ -19,8 +19,12 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
     private static final Logger logger = LoggerFactory.getLogger(PacketEncoder.class);
 
     private final Map<Class<? extends OutboundPacket>, Code> codes;
+    private final Function<Integer, Integer> codeDynamicTransformer;
 
-    public PacketEncoder(Function<Integer, Integer> codeTransformer) {
+    public PacketEncoder(Function<Integer, Integer> codePreTransformer,
+                         Function<Integer, Integer> codeDynamicTransformer) {
+        this.codeDynamicTransformer = codeDynamicTransformer;
+
         ImmutableMap.Builder<Class<? extends OutboundPacket>, Code> codesBuilder = ImmutableMap.builder();
 
         Reflections reflections = ReflectionsUtil.forPackage(OutboundPacket.class.getPackage().getName());
@@ -34,8 +38,8 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
             int minor = packetCode.minor();
 
             if (packetCode.transformable()) {
-                Integer transformedMajor = codeTransformer.apply(major);
-                Integer transformedMinor = codeTransformer.apply(minor);
+                Integer transformedMajor = codePreTransformer.apply(major);
+                Integer transformedMinor = codePreTransformer.apply(minor);
 
                 if (transformedMajor == null || transformedMinor == null) {
                     logger.warn("Packet {} has not been registered because its code ({}, {}) can't be transformed",
@@ -47,7 +51,7 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
                 minor = transformedMinor;
             }
 
-            codesBuilder.put(packet, new Code(major, minor));
+            codesBuilder.put(packet, new Code(major, minor, packetCode.transformable()));
             logger.debug("Packet {} has been registered with code ({}, {})",
                     packet.getSimpleName(), major, minor);
         }
@@ -59,12 +63,18 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
     protected void encode(ChannelHandlerContext ctx, OutboundPacket msg, List<Object> out) throws Exception {
         Code code = codes.get(msg.getClass());
         if (code == null) {
-            throw new EncoderException(String.format("packet %s is not registered", msg.getClass().getSimpleName()));
+            throw new EncoderException(String.format("Packet %s is not registered", msg.getClass().getSimpleName()));
         }
 
         ByteBuf buf = ctx.alloc().buffer();
-        buf.writeByte(code.major);
-        buf.writeByte(code.minor);
+        if (code.transformable) {
+            buf.writeByte(codeDynamicTransformer.apply(code.major));
+            buf.writeByte(codeDynamicTransformer.apply(code.minor));
+        }
+        else {
+            buf.writeByte(code.major);
+            buf.writeByte(code.minor);
+        }
         msg.write(new TransformiceByteBuf(buf));
 
         out.add(buf);
@@ -74,10 +84,12 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
     private static final class Code {
         final int major;
         final int minor;
+        final boolean transformable;
 
-        Code(int major, int minor) {
+        Code(int major, int minor, boolean transformable) {
             this.major = major;
             this.minor = minor;
+            this.transformable = transformable;
         }
     }
 }

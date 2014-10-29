@@ -1,10 +1,12 @@
 package com.atelier801.transformice.client;
 
-import java.util.Map;
+import java.util.function.Function;
 
 public interface ProtoData {
     int getVersion();
     String getKey();
-    Map<Integer, Integer> getCodeTransforms();
-    Map<String, Integer> getTribulleCodes();
+
+    Function<Integer, Integer> getPacketCodePreTransformer();
+    Function<Integer, Integer> getPacketCodeDynamicTransformer();
+    Function<String, Integer> getTribulleLabelResolver();
 }
