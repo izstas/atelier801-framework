@@ -38,6 +38,7 @@ public interface Transformice {
     Room room();
     interface Room extends Chat {
         String getName();
+        Collection<RoomMouse> getMice();
     }
 
     /**

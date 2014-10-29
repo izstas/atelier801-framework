@@ -265,12 +265,22 @@ public final class TransformiceClient implements Transformice {
 
     private final class RoomImpl implements Room {
         private String name;
+        final Pool<Integer, RoomMouseImpl, DRoomMouse> mice =
+                new Pool<>(id -> new RoomMouseImpl(TransformiceClient.this, id), DRoomMouse::getId);
 
         @Override
         public String getName() {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
 
             return name;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Collection<RoomMouse> getMice() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+            return (Collection) mice.valid();
         }
 
         @Override
@@ -528,6 +538,28 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPRoom.class, p -> {
             emitNext(new RoomChangeEvent(room.name = p.getRoom()));
+        });
+
+        putPacketHandler(IPRoomMice.class, p -> {
+            room.mice.replaceAll(p.getMice());
+        });
+
+        putPacketHandler(IPRoomMouse.class, p -> {
+            if (room.mice.getValid(p.getMouse().getId()) == null) {
+                emitNext(new RoomMouseJoinEvent(room.mice.replace(p.getMouse())));
+            }
+            else { // I think this happens ONLY on respawn
+                emitNext(new RoomMouseRespawnEvent(room.mice.replace(p.getMouse())));
+            }
+        });
+
+        putPacketHandler(IPRoomMouseLeave.class, p -> {
+            RoomMouseImpl mouse = room.mice.getValid(p.getMouseId());
+            if (mouse != null) {
+                room.mice.invalidate(p.getMouseId());
+
+                emitNext(new RoomMouseLeaveEvent(mouse));
+            }
         });
 
         putPacketHandler(IPRoomMessage.class, p -> {
