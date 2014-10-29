@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 
 import com.atelier801.transformice.client.proto.data.DRoomMouse;
 
+// Valid for 1.201
 @InboundLegacyPacket.Code(major = 8, minor = 9)
 public final class IPRoomMice implements InboundLegacyPacket {
     private final List<DRoomMouse> mice;
