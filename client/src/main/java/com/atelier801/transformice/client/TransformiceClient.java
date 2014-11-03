@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -54,7 +53,6 @@ public final class TransformiceClient implements Transformice {
         channel = new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                 .handler(new TransformiceChannelInitializer(protoData,
                         new CommonChannelHandler(), new MainChannelHandler()))
                 .connect(address)
