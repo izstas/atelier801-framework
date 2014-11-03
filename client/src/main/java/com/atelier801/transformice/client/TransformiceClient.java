@@ -62,7 +62,7 @@ public final class TransformiceClient implements Transformice {
                     if (!f.isSuccess()) {
                         logger.info("Unable to connect to the main server", f.cause());
                         emitNext(new StateChangeEvent(state = State.CLOSED));
-                        emitCompleted();
+                        eventLoopGroup.shutdownGracefully().addListener(sf -> emitCompleted());
                     }
                 })
                 .channel();
