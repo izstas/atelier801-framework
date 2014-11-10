@@ -274,6 +274,7 @@ public final class TransformiceClient implements Transformice {
 
     private final class RoomImpl implements Room {
         private String name;
+        private int round;
         final Pool<Integer, RoomMouseImpl, DRoomMouse> mice =
                 new Pool<>(id -> new RoomMouseImpl(TransformiceClient.this, id), DRoomMouse::getId);
 
@@ -547,6 +548,10 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPRoom.class, p -> {
             emitNext(new RoomChangeEvent(room.name = p.getRoom()));
+        });
+
+        putPacketHandler(IPRoomRound.class, p -> {
+            room.round = p.getId();
         });
 
         putPacketHandler(IPRoomMice.class, p -> {
