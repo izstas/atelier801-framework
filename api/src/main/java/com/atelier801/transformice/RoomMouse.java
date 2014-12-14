@@ -5,4 +5,7 @@ package com.atelier801.transformice;
  */
 public interface RoomMouse {
     String getName();
+    boolean isDead();
+    int getScore();
+    boolean hasCheese();
 }
