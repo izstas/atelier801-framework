@@ -1,6 +1,7 @@
 package com.atelier801.transformice.client;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -573,6 +574,35 @@ public final class TransformiceClient implements Transformice {
                 room.mice.invalidate(p.getMouseId());
 
                 emitNext(new RoomMouseLeaveEvent(mouse));
+            }
+        });
+
+        putPacketHandler(IPRoomMouseDie.class, p -> {
+            RoomMouseImpl mouse = room.mice.getValid(p.getMouseId());
+            if (mouse != null) {
+                mouse.setDead(true);
+                mouse.setScore(p.getMouseNewScore());
+
+                emitNext(new RoomMouseDieEvent(mouse));
+            }
+        });
+
+        putPacketHandler(IPRoomMouseCheese.class, p -> {
+            RoomMouseImpl mouse = room.mice.getValid(p.getMouseId());
+            if (mouse != null) {
+                mouse.setCheese(true);
+
+                emitNext(new RoomMouseCheeseEvent(mouse));
+            }
+        });
+
+        putPacketHandler(IPRoomMouseHole.class, p -> {
+            RoomMouseImpl mouse = room.mice.getValid(p.getMouseId());
+            if (mouse != null) {
+                mouse.setDead(true);
+                mouse.setScore(p.getMouseNewScore());
+
+                emitNext(new RoomMouseHoleEvent(mouse, p.getPosition(), Duration.ofMillis(p.getTime() * 10)));
             }
         });
 
