@@ -276,6 +276,7 @@ public final class TransformiceClient implements Transformice {
     private final class RoomImpl implements Room {
         private String name;
         private int round;
+        private RoomMap map;
         final Pool<Integer, RoomMouseImpl, DRoomMouse> mice =
                 new Pool<>(id -> new RoomMouseImpl(TransformiceClient.this, id), DRoomMouse::getId);
 
@@ -284,6 +285,13 @@ public final class TransformiceClient implements Transformice {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
 
             return name;
+        }
+
+        @Override
+        public RoomMap getMap() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+            return map;
         }
 
         @Override
@@ -553,6 +561,20 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPRoomRound.class, p -> {
             room.round = p.getId();
+
+            String mapXml = p.getMapXml();
+            String mapAuthor = p.getMapAuthor();
+            RoomMapCategory mapCategory = RoomMapCategory.valueOf(p.getMapCategory());
+            if (p.getMapXml().isEmpty()) {
+                mapXml = null;
+                mapAuthor = "Tigrounette";
+                mapCategory = RoomMapCategory.NON_XML_VANILLA;
+            }
+            else if (p.getMapId() < 1000 && p.getMapAuthor().equals("Tigrounette") && p.getMapCategory() == 2) {
+                mapCategory = RoomMapCategory.VANILLA;
+            }
+
+            room.map = new RoomMap(p.getMapId(), mapXml, mapAuthor, mapCategory);
         });
 
         putPacketHandler(IPRoomMice.class, p -> {
