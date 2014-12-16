@@ -11,6 +11,16 @@ import java.util.Map;
 public final class RoomMapCategory {
     private static final Map<Integer, RoomMapCategory> byId = new HashMap<>();
 
+    /**
+     * Not a real category: Vanilla maps <strong>without XML</strong>
+     */
+    public static final RoomMapCategory NON_XML_VANILLA = new RoomMapCategory(-1, "Non-XML Vanilla");
+
+    /**
+     * Not a real category: Vanilla maps <strong>with XML</strong>
+     */
+    public static final RoomMapCategory VANILLA = new RoomMapCategory(-2, "Vanilla");
+
     public static final RoomMapCategory UNPROTECTED = new RoomMapCategory(0, "Unprotected");
     public static final RoomMapCategory PROTECTED = new RoomMapCategory(1, "Protected");
     public static final RoomMapCategory PRIME_BOOTCAMP = new RoomMapCategory(3, "Prime Bootcamp");
@@ -54,7 +64,7 @@ public final class RoomMapCategory {
 
     @Override
     public String toString() {
-        return name + "(P" + id + ")";
+        return name + (id >= 0 ? " (P" + id + ")" : "");
     }
 
 
