@@ -575,10 +575,14 @@ public final class TransformiceClient implements Transformice {
             }
 
             room.map = new RoomMap(p.getMapId(), mapXml, mapAuthor, mapCategory);
+
+            // We emit RoomRoundEvent in IPRoomMice handler, which should be received right after this one
         });
 
         putPacketHandler(IPRoomMice.class, p -> {
             room.mice.replaceAll(p.getMice());
+
+            emitNext(new RoomRoundEvent());
         });
 
         putPacketHandler(IPRoomMouse.class, p -> {
