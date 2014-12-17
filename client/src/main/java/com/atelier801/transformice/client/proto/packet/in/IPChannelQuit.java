@@ -4,7 +4,7 @@ import lombok.*;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.123
+// Valid for 1.213
 @InboundTribullePacket.Label("ET_SignaleQuitteCanal")
 @Getter @ToString
 public final class IPChannelQuit implements InboundTribullePacket {
