@@ -420,7 +420,7 @@ public final class TransformiceClient implements Transformice {
         });
 
         putPacketHandler(IPChannelQuit.class, p -> {
-            if (p.getId() == tribe.channelId) {
+            if (p.getChannelId() == tribe.channelId) {
                 tribe.channelId = -1;
             }
         });
