@@ -2,7 +2,11 @@ package com.atelier801.transformice.client;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -501,7 +505,7 @@ public final class TransformiceClient implements Transformice {
                         Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
             }
             else {
-                ChatChannelImpl chatChannel = chatChannels.remove(p.getChannelId());
+                ChatChannelImpl chatChannel = chatChannels.get(p.getChannelId());
                 if (chatChannel != null) {
                     emitNext(new ChannelMessageEvent(chatChannel,
                             TransformiceUtil.normalizeMouseName(p.getSender()),
