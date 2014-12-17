@@ -24,6 +24,9 @@ public interface Transformice {
 
     void sendPrivateMessage(String recipient, String message);
 
+    Collection<ChatChannel> channels();
+    Observable<ChannelEnterEvent> enterChannel(String name);
+
     Tribe tribe();
     interface Tribe extends Chat {
         String getName();

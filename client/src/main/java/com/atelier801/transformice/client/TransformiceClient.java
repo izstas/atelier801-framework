@@ -2,10 +2,7 @@ package com.atelier801.transformice.client;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -159,6 +156,64 @@ public final class TransformiceClient implements Transformice {
         channel.writeAndFlush(new OPPrivateMessage(recipient, message.replace("&", "&amp;").replace("<", "&lt;")));
     }
 
+
+    /* CHAT CHANNELS */
+    private final Map<Integer, ChatChannelImpl> chatChannels = new HashMap<>();
+
+    @Override
+    public Collection<ChatChannel> channels() {
+        checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+        return Collections.unmodifiableCollection(chatChannels.values());
+    }
+
+    @Override
+    public Observable<ChannelEnterEvent> enterChannel(String name) {
+        checkNotNull(name, "name");
+        checkArgument(!name.isEmpty(), "name is empty");
+        checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+
+        channel.writeAndFlush(new OPChannelEnter("#" + name));
+        return observable.ofType(ChannelEnterEvent.class)
+                .filter(e -> e.getChannel().getName().equalsIgnoreCase("#" + name)).limit(1);
+    }
+
+    final class ChatChannelImpl implements ChatChannel {
+        private final int id;
+        private final String name;
+
+        ChatChannelImpl(int id, String name) {
+            this.id = id;
+            this.name = TransformiceUtil.normalizeMouseName(name.substring(1)); // This actually seems correct
+        }
+
+        @Override
+        public String getName() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(chatChannels.containsValue(this), "Not in channel");
+
+            return name;
+        }
+
+        @Override
+        public void sendMessage(String message) {
+            checkNotNull(message, "message");
+            checkArgument(!message.isEmpty(), "message is empty");
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(chatChannels.containsValue(this), "Not in channel");
+
+            channel.writeAndFlush(new OPChannelMessage(id, message.replace("&", "&amp;").replace("<", "&lt;")));
+        }
+
+        @Override
+        public Observable<ChannelQuitEvent> quit() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(chatChannels.containsValue(this), "Not in channel");
+
+            channel.writeAndFlush(new OPChannelQuit(id));
+            return observable.ofType(ChannelQuitEvent.class).filter(e -> e.getChannel() == this).limit(1);
+        }
+    }
 
     /* TRIBE */
     final TribeImpl tribe = new TribeImpl();
@@ -417,11 +472,23 @@ public final class TransformiceClient implements Transformice {
             if (p.getName().charAt(0) == '~') {
                 tribe.channelId = p.getId();
             }
+            else {
+                ChatChannelImpl chatChannel = new ChatChannelImpl(p.getId(), p.getName());
+                chatChannels.put(p.getId(), chatChannel);
+
+                emitNext(new ChannelEnterEvent(chatChannel));
+            }
         });
 
         putPacketHandler(IPChannelQuit.class, p -> {
             if (p.getChannelId() == tribe.channelId) {
                 tribe.channelId = -1;
+            }
+            else {
+                ChatChannelImpl chatChannel = chatChannels.remove(p.getChannelId());
+                if (chatChannel != null) {
+                    emitNext(new ChannelQuitEvent(chatChannel));
+                }
             }
         });
 
@@ -432,6 +499,15 @@ public final class TransformiceClient implements Transformice {
                                 .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
                         TransformiceUtil.normalizeMouseName(p.getSender()),
                         Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+            }
+            else {
+                ChatChannelImpl chatChannel = chatChannels.remove(p.getChannelId());
+                if (chatChannel != null) {
+                    emitNext(new ChannelMessageEvent(chatChannel,
+                            TransformiceUtil.normalizeMouseName(p.getSender()),
+                            Community.valueOf(p.getSenderCommunity()),
+                            p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+                }
             }
         });
 
