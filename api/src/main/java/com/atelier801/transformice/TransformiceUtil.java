@@ -28,6 +28,14 @@ public final class TransformiceUtil {
         return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
     }
 
+    public static String escapeMessage(String message) {
+        return message.replace("&", "&amp;").replace("<", "&lt;");
+    }
+
+    public static String unescapeMessage(String message) {
+        return message.replace("&lt;", "<").replace("&amp;", "&");
+    }
+
 
     private TransformiceUtil() {
         throw new AssertionError();

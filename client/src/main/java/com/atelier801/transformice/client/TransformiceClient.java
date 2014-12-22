@@ -157,7 +157,7 @@ public final class TransformiceClient implements Transformice {
         checkArgument(!message.isEmpty(), "message is empty");
         checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
 
-        channel.writeAndFlush(new OPPrivateMessage(recipient, message.replace("&", "&amp;").replace("<", "&lt;")));
+        channel.writeAndFlush(new OPPrivateMessage(recipient, TransformiceUtil.escapeMessage(message)));
     }
 
 
@@ -206,7 +206,7 @@ public final class TransformiceClient implements Transformice {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(chatChannels.containsValue(this), "Not in channel");
 
-            channel.writeAndFlush(new OPChannelMessage(id, message.replace("&", "&amp;").replace("<", "&lt;")));
+            channel.writeAndFlush(new OPChannelMessage(id, TransformiceUtil.escapeMessage(message)));
         }
 
         @Override
@@ -288,7 +288,7 @@ public final class TransformiceClient implements Transformice {
             checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
             checkState(channelId != -1, "Not in tribe channel");
 
-            channel.writeAndFlush(new OPChannelMessage(channelId, message.replace("&", "&amp;").replace("<", "&lt;")));
+            channel.writeAndFlush(new OPChannelMessage(channelId, TransformiceUtil.escapeMessage(message)));
         }
 
         @Override
@@ -367,7 +367,7 @@ public final class TransformiceClient implements Transformice {
             checkArgument(!message.isEmpty(), "message is empty");
             checkState(satelliteState == SatelliteState.CONNECTED, "Illegal satellite state: %s", satelliteState);
 
-            satelliteChannel.writeAndFlush(new OPRoomMessage(message.replace("&", "&amp;").replace("<", "&lt;")));
+            satelliteChannel.writeAndFlush(new OPRoomMessage(TransformiceUtil.escapeMessage(message)));
         }
     }
 
@@ -502,7 +502,7 @@ public final class TransformiceClient implements Transformice {
                         tribe.members.valid().stream()
                                 .filter(m -> m.getName().equalsIgnoreCase(p.getSender())).findAny().orElse(null),
                         TransformiceUtil.normalizeMouseName(p.getSender()),
-                        Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+                        Community.valueOf(p.getSenderCommunity()), TransformiceUtil.unescapeMessage(p.getMessage())));
             }
             else {
                 ChatChannelImpl chatChannel = chatChannels.get(p.getChannelId());
@@ -510,7 +510,7 @@ public final class TransformiceClient implements Transformice {
                     emitNext(new ChannelMessageEvent(chatChannel,
                             TransformiceUtil.normalizeMouseName(p.getSender()),
                             Community.valueOf(p.getSenderCommunity()),
-                            p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+                            TransformiceUtil.unescapeMessage(p.getMessage())));
                 }
             }
         });
@@ -519,7 +519,7 @@ public final class TransformiceClient implements Transformice {
             if (!p.isOutgoing()) {
                 emitNext(new PrivateMessageEvent(msg -> sendPrivateMessage(p.getSender(), msg),
                         TransformiceUtil.normalizeMouseName(p.getSender()), Community.valueOf(p.getSenderCommunity()),
-                        p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+                        TransformiceUtil.unescapeMessage(p.getMessage())));
             }
         });
 
@@ -714,7 +714,7 @@ public final class TransformiceClient implements Transformice {
 
         putPacketHandler(IPRoomMessage.class, p -> {
             emitNext(new RoomMessageEvent(room, p.getSender(),
-                    Community.valueOf(p.getSenderCommunity()), p.getMessage().replace("&lt;", "<").replace("&amp;", "&")));
+                    Community.valueOf(p.getSenderCommunity()), TransformiceUtil.unescapeMessage(p.getMessage())));
         });
     }
 
