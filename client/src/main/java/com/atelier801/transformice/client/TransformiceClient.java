@@ -179,7 +179,7 @@ public final class TransformiceClient implements Transformice {
 
         channel.writeAndFlush(new OPChannelEnter("#" + name));
         return observable.ofType(ChannelEnterEvent.class)
-                .filter(e -> e.getChannel().getName().equalsIgnoreCase("#" + name)).limit(1);
+                .filter(e -> e.getChannel().getName().equalsIgnoreCase(name)).limit(1);
     }
 
     final class ChatChannelImpl implements ChatChannel {
