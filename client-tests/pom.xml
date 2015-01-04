@@ -62,6 +62,12 @@
             <goals>
               <goal>integration-test</goal>
             </goals>
+
+            <configuration>
+              <systemProperties>
+                <org.slf4j.simpleLogger.defaultLogLevel>trace</org.slf4j.simpleLogger.defaultLogLevel>
+              </systemProperties>
+            </configuration>
           </execution>
 
           <execution>
