@@ -56,19 +56,16 @@ public class TransformiceClientIT {
         assertEquals(stateChangeEvent.getState(), Transformice.State.CONNECTED, "stateChangeEvent.getState");
     }
 
-    @Test(timeOut = 6000, dependsOnMethods = "testConnect")
+    @Test(timeOut = 5000, dependsOnMethods = "testConnect")
     public void testLogIn() throws Exception {
         room = "*Room" + System.currentTimeMillis();
 
         LoginEvent loginEvent = tfm.logIn(username, Optional.of(password), Optional.of(room)).toBlocking().first();
         assertTrue(loginEvent.isSuccess(), "loginEvent.isSuccess");
         assertEquals(((LoginSuccessEvent) loginEvent).getMouseName(), username, "loginEvent.getMouseName");
-
-        // Sleep for a second to make sure the server is ready
-        Thread.sleep(1000);
     }
 
-    @Test(timeOut = 5000, dependsOnMethods = "testLogIn")
+    @Test(timeOut = 5000, dependsOnMethods = "testLogIn", priority = -1)
     public void testInitialTribe() throws Exception {
         allEvents.ofType(TribeChangeEvent.class).toBlocking().first();
         assertEquals(tfm.tribe().getName(), tribe, "tribe.getName");
@@ -98,7 +95,7 @@ public class TransformiceClientIT {
         assertNotNull(testTribeMember1, "testTribeMember1");
     }
 
-    @Test(timeOut = 5000, dependsOnMethods = "testLogIn")
+    @Test(timeOut = 5000, dependsOnMethods = "testLogIn", priority = -1)
     public void testInitialRoom() throws Exception {
         allEvents.ofType(RoomChangeEvent.class).toBlocking().first();
         assertEquals(tfm.room().getName(), room, "room.getName");
