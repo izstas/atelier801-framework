@@ -153,8 +153,11 @@ public class TransformiceClientIT {
         assertEquals(tribeMessageEvent.getMessage(), message, "tribeMessageEvent.getMessage");
     }
 
-    @Test(timeOut = 5000, dependsOnMethods = "testInitialTribe", priority = 1)
+    @Test(timeOut = 8000, dependsOnMethods = "testInitialTribe", priority = 1)
     public void testTribeEnterHouse() throws Exception {
+        // Server won't let you change rooms fast
+        Thread.sleep(3000);
+
         tfm.tribe().enterHouse().toBlocking().first();
         assertEquals(tfm.room().getName(), "*\u0003" + tribe, "room.getName");
     }
