@@ -23,6 +23,7 @@ public class TransformiceClientIT {
     private TribeRank testTribeRank1, testTribeRank2;
     private TribeMember testTribeMember0, testTribeMember1;
     private ChatChannel testChannel;
+    private RoomMouse testRoomMouse;
 
     @BeforeClass
     public void setUp() throws Exception {
@@ -105,7 +106,7 @@ public class TransformiceClientIT {
     public void testInitialRoomMice() throws Exception {
         assertEquals(tfm.room().getMice().size(), 1, "room.getMice.size");
 
-        RoomMouse testRoomMouse = tfm.room().getMice().stream().filter(m -> m.getName().equals(username)).findAny().orElse(null);
+        testRoomMouse = tfm.room().getMice().stream().filter(m -> m.getName().equals(username)).findAny().orElse(null);
         assertNotNull(testRoomMouse, "testRoomMouse");
     }
 
@@ -158,5 +159,15 @@ public class TransformiceClientIT {
 
         testTribeMember1.changeRank(newRank).toBlocking().first();
         assertEquals(testTribeMember1.getRank(), newRank);
+    }
+
+    @Test(timeOut = 5000, dependsOnMethods = "testInitialRoomMice")
+    public void testRoomSendMessage() throws Exception {
+        String message = "Message" + System.currentTimeMillis();
+
+        tfm.room().sendMessage(message);
+        RoomMessageEvent roomMessageEvent = tfm.events().ofType(RoomMessageEvent.class)
+                .filter(e -> e.getSender() == testRoomMouse).toBlocking().first();
+        assertEquals(roomMessageEvent.getMessage(), message, "roomMessageEvent.getMessage");
     }
 }

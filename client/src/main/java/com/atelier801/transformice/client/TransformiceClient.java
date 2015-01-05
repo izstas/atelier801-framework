@@ -713,7 +713,7 @@ public final class TransformiceClient implements Transformice {
         });
 
         putPacketHandler(IPRoomMessage.class, p -> {
-            emitNext(new RoomMessageEvent(room, p.getSender(),
+            emitNext(new RoomMessageEvent(room, room.mice.getValid(p.getSenderMouseId()), p.getSender(),
                     Community.valueOf(p.getSenderCommunity()), TransformiceUtil.unescapeMessage(p.getMessage())));
         });
     }
