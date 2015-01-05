@@ -153,6 +153,12 @@ public class TransformiceClientIT {
         assertEquals(tribeMessageEvent.getMessage(), message, "tribeMessageEvent.getMessage");
     }
 
+    @Test(timeOut = 5000, dependsOnMethods = "testInitialTribe", priority = 1)
+    public void testTribeEnterHouse() throws Exception {
+        tfm.tribe().enterHouse().toBlocking().first();
+        assertEquals(tfm.room().getName(), "*\u0003" + tribe, "room.getName");
+    }
+
     @Test(timeOut = 5000, dependsOnMethods = "testInitialTribeMembers")
     public void testTribeMemberChangeRank() throws Exception {
         TribeRank newRank = testTribeMember1.getRank() == testTribeRank2 ? testTribeRank1 : testTribeRank2;
