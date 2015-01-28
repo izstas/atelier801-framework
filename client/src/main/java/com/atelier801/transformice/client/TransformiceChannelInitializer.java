@@ -3,10 +3,9 @@ package com.atelier801.transformice.client;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
 
 import com.atelier801.transformice.client.proto.fingerprint.*;
+import com.atelier801.transformice.client.proto.length.*;
 import com.atelier801.transformice.client.proto.packet.*;
 
 final class TransformiceChannelInitializer extends ChannelInitializer<Channel> {
@@ -23,8 +22,8 @@ final class TransformiceChannelInitializer extends ChannelInitializer<Channel> {
         FingerprintGenerator fingerprintGenerator = new FingerprintGenerator();
         TribulleContext tribulleContext = new TribulleContext();
 
-        ch.pipeline().addLast("enc-length", new LengthFieldPrepender(4, true));
-        ch.pipeline().addLast("dec-length", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, -4, 4));
+        ch.pipeline().addLast("enc-length", new LengthPrepender());
+        ch.pipeline().addLast("dec-length", new LengthFrameDecoder());
 
         ch.pipeline().addLast("enc-fingerprint", new FingerprintPrepender(fingerprintGenerator));
 
