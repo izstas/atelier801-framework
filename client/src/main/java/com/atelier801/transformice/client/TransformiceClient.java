@@ -472,6 +472,10 @@ public final class TransformiceClient implements Transformice {
             satelliteChannel.writeAndFlush(new OPSatellitePing(p.getCounter()));
         });
 
+        putPacketHandler(IPRestartCountdown.class, p -> {
+            emitNext(new RestartCountdownEvent(p.getCountdown()));
+        });
+
         putPacketHandler(IPChannelEnter.class, p -> {
             if (p.getName().charAt(0) == '~') {
                 tribe.channelId = p.getId();
