@@ -2,10 +2,11 @@ package com.atelier801.transformice.client.proto.data;
 
 import java.util.List;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.193
+// Valid for 1.242 - needs refactoring!
 public final class DTribeMember {
     private final int id;
     private final String name;
@@ -21,7 +22,9 @@ public final class DTribeMember {
         rankId = in.readInt();
         joiningTime = in.readInt();
         lastConnectionTime = in.readInt();
-        locations = in.readList(in.readShort(), DLocation::new);
+
+        DLocation location = new DLocation(in);
+        locations = in.readBoolean() ? ImmutableList.of(location) : ImmutableList.of();
     }
 
     public int getId() {
