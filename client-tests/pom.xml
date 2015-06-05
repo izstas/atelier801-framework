@@ -5,7 +5,7 @@
   <parent>
     <artifactId>atelier801-framework</artifactId>
     <groupId>com.atelier801</groupId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>atelier801-client-tests</artifactId>
@@ -21,13 +21,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.9</version>
+      <version>1.7.12</version>
     </dependency>
 
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.8.13</version>
+      <version>6.9.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -4,7 +4,7 @@
 
   <groupId>com.atelier801</groupId>
   <artifactId>atelier801-framework</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Atelier801 Framework</name>
@@ -33,7 +33,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.14.8</version>
+        <version>1.16.4</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
@@ -53,7 +53,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.3</version>
 
         <configuration>
           <showWarnings>true</showWarnings>
@@ -71,7 +71,7 @@
 
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.6</version>
       </plugin>
 
       <plugin>
