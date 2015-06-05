@@ -17,8 +17,7 @@ public final class IzstasProtoData implements ProtoData {
     private String ip;
     private int version;
     private String key;
-    private Map<Integer, Integer> transforms;
-    private int dynamicTransformInitial, dynamicTransformAdd, dynamicTransformModulo;
+    private int loginKey;
     private Map<String, Integer> tribulle;
 
     public static IzstasProtoData fetch(String key) {
@@ -58,21 +57,18 @@ public final class IzstasProtoData implements ProtoData {
     }
 
     @Override
+    public Function<Integer, Integer> getLoginKeyFunction() {
+        return code -> code ^ loginKey;
+    }
+
+    @Override
     public Function<Integer, Integer> getPacketCodePreTransformer() {
-        return transforms::get;
+        return Function.identity();
     }
 
     @Override
     public Function<Integer, Integer> getPacketCodeDynamicTransformer() {
-        return new Function<Integer, Integer>() {
-            private int mask = dynamicTransformInitial;
-
-            @Override
-            public Integer apply(Integer code) {
-                mask = (mask + dynamicTransformAdd) % dynamicTransformModulo;
-                return code ^ mask;
-            }
-        };
+        return Function.identity();
     }
 
     @Override

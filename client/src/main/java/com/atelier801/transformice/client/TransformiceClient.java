@@ -115,6 +115,8 @@ public final class TransformiceClient implements Transformice {
 
 
     /* PRE-LOGIN */
+    private int loginCode;
+
     @Override
     public void changeCommunity(Community community) {
         checkNotNull(community, "community");
@@ -130,7 +132,7 @@ public final class TransformiceClient implements Transformice {
         checkNotNull(room, "room");
         checkState(state == State.CONNECTED, "Illegal state: %s", state);
 
-        channel.writeAndFlush(new OPLogin(username, password, room));
+        channel.writeAndFlush(new OPLogin(username, password, room, protoData.getLoginKeyFunction().apply(loginCode)));
 
         logger.info("Attempting to log in as {}", username);
         emitNext(new StateChangeEvent(state = State.LOGGING_IN));
@@ -780,6 +782,8 @@ public final class TransformiceClient implements Transformice {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, IPConnect msg) throws Exception {
+            loginCode = msg.getLoginCode();
+
             ctx.writeAndFlush(new OPClient());
 
             logger.info("Connection to the main server has been established");

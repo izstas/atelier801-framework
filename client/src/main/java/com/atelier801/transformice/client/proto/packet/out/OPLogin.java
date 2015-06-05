@@ -1,32 +1,25 @@
 package com.atelier801.transformice.client.proto.packet.out;
 
+import lombok.*;
+
 import java.util.Optional;
-import java.util.Random;
 import com.google.common.base.Charsets;
-import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.247
 @OutboundPacket.Code(major = 26, minor = 8)
+@AllArgsConstructor @ToString
 public final class OPLogin implements OutboundPacket {
-    private static final Random random = new Random();
-
     private final String username;
     private final Optional<String> password;
     private final Optional<String> room;
-
-    public OPLogin(String username, Optional<String> password, Optional<String> room) {
-        this.username = username;
-        this.password = password;
-        this.room = room;
-    }
+    private final int key;
 
     @Override
     public void write(TransformiceByteBuf out) {
-        out.writeByte(random.nextInt(100));
         out.writeUTF(username);
         out.writeUTF(password
                 .map(s -> Hashing.sha256().hashString(s, Charsets.UTF_8).toString())
@@ -37,18 +30,8 @@ public final class OPLogin implements OutboundPacket {
                         .hash().asBytes())
                 .map(BaseEncoding.base64()::encode)
                 .orElse("")); // SHAKikoo!
-        out.writeByte(random.nextInt(100));
-        out.writeByte(random.nextInt(100));
         out.writeUTF("http://www.transformice.com/Transformice.swf?d=" + (System.currentTimeMillis() - 5000));
         out.writeUTF(room.orElse("1"));
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("username", username)
-                .add("password", password.isPresent() ? "Optional[**HIDDEN**]" : "Optional.empty")
-                .add("room", room)
-                .toString();
+        out.writeInt(key);
     }
 }
