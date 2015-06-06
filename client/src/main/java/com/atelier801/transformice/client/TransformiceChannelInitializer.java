@@ -27,8 +27,7 @@ final class TransformiceChannelInitializer extends ChannelInitializer<Channel> {
 
         ch.pipeline().addLast("enc-fingerprint", new FingerprintPrepender(fingerprintGenerator));
 
-        ch.pipeline().addLast("enc-packet",
-                new PacketEncoder(data.getPacketCodePreTransformer(), data.getPacketCodeDynamicTransformer()));
+        ch.pipeline().addLast("enc-packet", new PacketEncoder());
         ch.pipeline().addLast("dec-packet", new PacketDecoder());
 
         ch.pipeline().addLast("enc-packet-legacy", new LegacyPacketEncoder());

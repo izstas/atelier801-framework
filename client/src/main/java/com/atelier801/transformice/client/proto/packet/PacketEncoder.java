@@ -2,7 +2,6 @@ package com.atelier801.transformice.client.proto.packet;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,12 +18,8 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
     private static final Logger logger = LoggerFactory.getLogger(PacketEncoder.class);
 
     private final Map<Class<? extends OutboundPacket>, Code> codes;
-    private final Function<Integer, Integer> codeDynamicTransformer;
 
-    public PacketEncoder(Function<Integer, Integer> codePreTransformer,
-                         Function<Integer, Integer> codeDynamicTransformer) {
-        this.codeDynamicTransformer = codeDynamicTransformer;
-
+    public PacketEncoder() {
         ImmutableMap.Builder<Class<? extends OutboundPacket>, Code> codesBuilder = ImmutableMap.builder();
 
         Reflections reflections = ReflectionsUtil.forPackage(OutboundPacket.class.getPackage().getName());
@@ -34,26 +29,10 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
             }
 
             OutboundPacket.Code packetCode = packet.getAnnotation(OutboundPacket.Code.class);
-            int major = packetCode.major();
-            int minor = packetCode.minor();
 
-            if (packetCode.transformable()) {
-                Integer transformedMajor = codePreTransformer.apply(major);
-                Integer transformedMinor = codePreTransformer.apply(minor);
-
-                if (transformedMajor == null || transformedMinor == null) {
-                    logger.warn("Packet {} has not been registered because its code ({}, {}) can't be transformed",
-                            packet.getSimpleName(), major, minor);
-                    continue;
-                }
-
-                major = transformedMajor;
-                minor = transformedMinor;
-            }
-
-            codesBuilder.put(packet, new Code(major, minor, packetCode.transformable()));
+            codesBuilder.put(packet, new Code(packetCode.major(), packetCode.minor()));
             logger.debug("Packet {} has been registered with code ({}, {})",
-                    packet.getSimpleName(), major, minor);
+                    packet.getSimpleName(), packetCode.major(), packetCode.minor());
         }
 
         codes = codesBuilder.build();
@@ -67,14 +46,8 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
         }
 
         ByteBuf buf = ctx.alloc().buffer();
-        if (code.transformable) {
-            buf.writeByte(codeDynamicTransformer.apply(code.major));
-            buf.writeByte(codeDynamicTransformer.apply(code.minor));
-        }
-        else {
-            buf.writeByte(code.major);
-            buf.writeByte(code.minor);
-        }
+        buf.writeByte(code.major);
+        buf.writeByte(code.minor);
         msg.write(new TransformiceByteBuf(buf));
 
         out.add(buf);
@@ -84,12 +57,10 @@ public final class PacketEncoder extends MessageToMessageEncoder<OutboundPacket>
     private static final class Code {
         final int major;
         final int minor;
-        final boolean transformable;
 
-        Code(int major, int minor, boolean transformable) {
+        Code(int major, int minor) {
             this.major = major;
             this.minor = minor;
-            this.transformable = transformable;
         }
     }
 }
