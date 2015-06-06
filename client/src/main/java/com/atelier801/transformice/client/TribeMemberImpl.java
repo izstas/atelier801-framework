@@ -1,16 +1,12 @@
 package com.atelier801.transformice.client;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import rx.Observable;
 
 import com.atelier801.transformice.Location;
 import com.atelier801.transformice.TransformiceUtil;
 import com.atelier801.transformice.TribeMember;
 import com.atelier801.transformice.TribeRank;
-import com.atelier801.transformice.client.proto.data.DLocation;
 import com.atelier801.transformice.client.proto.data.DTribeMember;
 import com.atelier801.transformice.event.TribeMemberKickEvent;
 import com.atelier801.transformice.event.TribeMemberRankChangeEvent;
@@ -22,7 +18,8 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     private TribeRankImpl rank;
     private Instant joiningTime;
     private Instant lastConnectionTime;
-    private List<Location> locations;
+    private Location location;
+    private boolean online;
 
     TribeMemberImpl(TransformiceClient transformice, int id) {
         this.transformice = transformice;
@@ -35,7 +32,8 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
         rank = transformice.tribe.ranks.get(data.getRankId());
         joiningTime = Instant.ofEpochSecond(data.getJoiningTime() * 60);
         lastConnectionTime = Instant.ofEpochSecond(data.getLastConnectionTime() * 60);
-        locations = data.getLocations().stream().map(DLocation::toLocation).collect(Collectors.toList());
+        location = data.getLocation().toLocation();
+        online = data.isOnline();
     }
 
     @Override
@@ -63,18 +61,23 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     }
 
     @Override
-    public List<Location> getLocations() {
-        return Collections.unmodifiableList(locations);
+    public Location getLocation() {
+        if (!online) {
+            throw new IllegalStateException("The tribe member is not online");
+        }
+
+        return location;
     }
 
-    void replaceLocation(Location location) {
-        locations.removeIf(l -> l.getGame() == location.getGame());
-        locations.add(location);
+    @Override
+    public boolean isOnline() {
+        return online;
     }
 
-    boolean removeLocation(Location.Game game) {
-        return locations.removeIf(l -> l.getGame() == game);
+    void setOnline(boolean online) {
+        this.online = online;
     }
+
 
     @Override
     public Observable<TribeMemberRankChangeEvent> changeRank(TribeRank rank) {

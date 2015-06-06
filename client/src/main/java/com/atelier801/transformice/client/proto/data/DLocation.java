@@ -1,11 +1,12 @@
 package com.atelier801.transformice.client.proto.data;
 
-import com.google.common.base.MoreObjects;
+import lombok.*;
 
 import com.atelier801.transformice.Location;
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// While 1.242 doesn't have this structure anymore, it's still convenient to have
+@Getter @ToString
 public final class DLocation {
     private final int game;
     private final String room;
@@ -13,22 +14,6 @@ public final class DLocation {
     public DLocation(TransformiceByteBuf in) {
         game = in.readInt();
         room = in.readUTF();
-    }
-
-    public int getGame() {
-        return game;
-    }
-
-    public String getRoom() {
-        return room;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("game", game)
-                .add("room", room)
-                .toString();
     }
 
     public Location toLocation() {

@@ -562,19 +562,18 @@ public final class TransformiceClient implements Transformice {
         });
 
         Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
-            // Workaround for what looks like a tribulle bug
+            // Tribulle acts really weird when one player is logged in on multiple games
             TribeMemberImpl member = tribe.members.getValid(d.getId());
-            Collection<Location> locations = null;
+            boolean wasOnline = false;
             if (member != null) {
-                locations = member.getLocations();
+                wasOnline = member.isOnline();
             }
 
             member = tribe.members.replace(d);
-            if (locations != null) {
-                locations.forEach(member::replaceLocation);
-            }
 
-            emitNext(new TribeMemberConnectEvent(member, d.getLocations().get(0).toLocation().getGame()));
+            if (!wasOnline) {
+                emitNext(new TribeMemberConnectEvent(member, d.getLocation().toLocation().getGame()));
+            }
         };
 
         putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
@@ -583,10 +582,9 @@ public final class TransformiceClient implements Transformice {
         BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gameId) -> {
             TribeMemberImpl member = tribe.members.getValid(id);
             if (member != null) {
-                Location.Game game = Location.Game.valueOf(gameId);
-                if (member.removeLocation(game)) {
-                    emitNext(new TribeMemberDisconnectEvent(member, game));
-                }
+                member.setOnline(false);
+
+                emitNext(new TribeMemberDisconnectEvent(member, Location.Game.valueOf(gameId)));
             }
         };
 
@@ -631,6 +629,7 @@ public final class TransformiceClient implements Transformice {
             }
         });
 
+        /* Server doesn't sent this packet anymore
         putPacketHandler(IPTribeMemberLocation.class, p -> {
             TribeMemberImpl member = tribe.members.getValid(p.getId());
             if (member != null) {
@@ -640,6 +639,7 @@ public final class TransformiceClient implements Transformice {
                 emitNext(new TribeMemberLocationChangeEvent(member, location));
             }
         });
+        */
 
         putPacketHandler(IPRoom.class, p -> {
             emitNext(new RoomChangeEvent(room.name = p.getRoom()));

@@ -1,6 +1,7 @@
 package com.atelier801.transformice;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import rx.Observable;
 
@@ -15,8 +16,14 @@ public interface TribeMember {
     TribeRank getRank();
     Instant getJoiningTime();
     Instant getLastConnectionTime();
-    List<Location> getLocations();
+    Location getLocation();
+    boolean isOnline();
 
     Observable<TribeMemberRankChangeEvent> changeRank(TribeRank rank);
     Observable<TribeMemberKickEvent> kick();
+
+    @Deprecated
+    default List<Location> getLocations() {
+        return isOnline() ? Collections.singletonList(getLocation()) : Collections.emptyList();
+    }
 }
