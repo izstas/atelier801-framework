@@ -7,7 +7,5 @@ public interface ProtoData {
     String getKey();
 
     Function<Integer, Integer> getLoginKeyFunction();
-    Function<Integer, Integer> getPacketCodePreTransformer();
-    Function<Integer, Integer> getPacketCodeDynamicTransformer();
     Function<String, Integer> getTribulleLabelResolver();
 }

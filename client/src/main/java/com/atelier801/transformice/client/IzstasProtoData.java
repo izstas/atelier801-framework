@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.function.Function;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.net.UrlEscapers;
@@ -35,7 +34,7 @@ public final class IzstasProtoData implements ProtoData {
             json = Resources.toString(url, Charsets.UTF_8);
         }
         catch (IOException e) {
-            throw new RuntimeException("unable to fetch data", e);
+            throw new RuntimeException("Unable to fetch the data", e);
         }
 
         return gson.fromJson(json, IzstasProtoData.class);
@@ -59,16 +58,6 @@ public final class IzstasProtoData implements ProtoData {
     @Override
     public Function<Integer, Integer> getLoginKeyFunction() {
         return code -> code ^ loginKey;
-    }
-
-    @Override
-    public Function<Integer, Integer> getPacketCodePreTransformer() {
-        return Function.identity();
-    }
-
-    @Override
-    public Function<Integer, Integer> getPacketCodeDynamicTransformer() {
-        return Function.identity();
     }
 
     @Override
