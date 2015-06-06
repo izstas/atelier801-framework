@@ -11,7 +11,7 @@ import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
 // Valid for 1.247
 @OutboundPacket.Code(major = 26, minor = 8)
-@AllArgsConstructor @ToString
+@AllArgsConstructor
 public final class OPLogin implements OutboundPacket {
     private final String username;
     private final Optional<String> password;
@@ -33,5 +33,14 @@ public final class OPLogin implements OutboundPacket {
         out.writeUTF("http://www.transformice.com/Transformice.swf?d=" + (System.currentTimeMillis() - 5000));
         out.writeUTF(room.orElse("1"));
         out.writeInt(key);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +
+                "(username=" + username +
+                ", password=" + (password.isPresent() ? "Optional[*HIDDEN*]" : password) +
+                ", room=" + room +
+                ", key=" + key + ")";
     }
 }
