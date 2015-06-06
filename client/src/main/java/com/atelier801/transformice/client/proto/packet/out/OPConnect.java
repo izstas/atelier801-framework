@@ -8,7 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
 // Valid for 1.180
-@OutboundPacket.Code(major = 28, minor = 1, transformable = false)
+@OutboundPacket.Code(major = 28, minor = 1)
 public final class OPConnect implements OutboundPacket {
     private static final Random random = new Random();
 

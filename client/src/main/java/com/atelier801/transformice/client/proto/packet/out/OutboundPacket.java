@@ -13,10 +13,8 @@ public interface OutboundPacket {
 
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface Code {
+    @interface Code {
         int major();
         int minor();
-
-        boolean transformable() default true;
     }
 }

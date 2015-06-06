@@ -5,7 +5,7 @@ import com.google.common.base.MoreObjects;
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
 // Valid for 1.180
-@OutboundPacket.Code(major = 44, minor = 1, transformable = false)
+@OutboundPacket.Code(major = 44, minor = 1)
 public final class OPSatelliteConnect implements OutboundPacket {
     private final int key;
 
