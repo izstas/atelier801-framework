@@ -4,17 +4,15 @@ import com.atelier801.transformice.Location;
 import com.atelier801.transformice.TribeMember;
 
 /**
- * This event gets triggered when a tribe member connects to a game.
+ * This event gets triggered when a tribe member connects.
  */
 public class TribeMemberConnectEvent extends TribeMemberEvent {
-    private final Location.Game game;
-
-    public TribeMemberConnectEvent(TribeMember member, Location.Game game) {
+    public TribeMemberConnectEvent(TribeMember member) {
         super(member);
-        this.game = game;
     }
 
+    @Deprecated
     public Location.Game getGame() {
-        return game;
+        return Location.Game.valueOf(1);
     }
 }

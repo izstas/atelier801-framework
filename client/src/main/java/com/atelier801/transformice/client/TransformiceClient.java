@@ -563,35 +563,29 @@ public final class TransformiceClient implements Transformice {
 
         Consumer<DTribeMember> tribeMemberConnectHandler = d -> {
             // Tribulle acts really weird when one player is logged in on multiple games
-            TribeMemberImpl member = tribe.members.getValid(d.getId());
-            boolean wasOnline = false;
-            if (member != null) {
-                wasOnline = member.isOnline();
-            }
+            boolean wasOnline = Optional.ofNullable(tribe.members.getValid(d.getId())).map(TribeMemberImpl::isOnline).orElse(false);
 
-            member = tribe.members.replace(d);
+            TribeMemberImpl member = tribe.members.replace(d);
 
             if (!wasOnline) {
-                emitNext(new TribeMemberConnectEvent(member, d.getLocation().toLocation().getGame()));
+                emitNext(new TribeMemberConnectEvent(member));
             }
         };
 
         putPacketHandler(IPTribeMemberConnect.class, p -> tribeMemberConnectHandler.accept(p.getMember()));
         putPacketHandler(IPTribeMemberConnectBatch.class, p -> p.getMembers().forEach(tribeMemberConnectHandler));
 
-        BiConsumer<Integer, Integer> tribeMemberDisconnectHandler = (id, gameId) -> {
+        Consumer<Integer> tribeMemberDisconnectHandler = id -> {
             TribeMemberImpl member = tribe.members.getValid(id);
-            if (member != null) {
+            if (member != null && member.isOnline()) {
                 member.setOnline(false);
 
-                emitNext(new TribeMemberDisconnectEvent(member, Location.Game.valueOf(gameId)));
+                emitNext(new TribeMemberDisconnectEvent(member));
             }
         };
 
-        putPacketHandler(IPTribeMemberDisconnect.class,
-                p -> tribeMemberDisconnectHandler.accept(p.getId(), p.getGame()));
-        putPacketHandler(IPTribeMemberDisconnectBatch.class,
-                p -> p.getIds().forEach(id -> tribeMemberDisconnectHandler.accept(id, p.getGame())));
+        putPacketHandler(IPTribeMemberDisconnect.class, p -> tribeMemberDisconnectHandler.accept(p.getMemberId()));
+        putPacketHandler(IPTribeMemberDisconnectBatch.class, p -> p.getMemberIds().forEach(tribeMemberDisconnectHandler));
 
         putPacketHandler(IPTribeMemberJoin.class, p -> {
             TribeMemberImpl member = tribe.members.replace(p.getMember());
@@ -631,7 +625,7 @@ public final class TransformiceClient implements Transformice {
 
         /* Server doesn't sent this packet anymore
         putPacketHandler(IPTribeMemberLocation.class, p -> {
-            TribeMemberImpl member = tribe.members.getValid(p.getId());
+            TribeMemberImpl member = tribe.members.getValid(p.getMemberId());
             if (member != null) {
                 Location location = p.getLocation().toLocation();
                 member.replaceLocation(location);

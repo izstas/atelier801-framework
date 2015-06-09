@@ -1,34 +1,19 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
+import lombok.*;
 import java.util.List;
-import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.247
 @InboundTribullePacket.Label("ET_SignaleDeconnexionMembres")
+@Getter @ToString
 public final class IPTribeMemberDisconnectBatch implements InboundTribullePacket {
     private final int game;
-    private final List<Integer> ids;
+    private final List<Integer> memberIds;
 
     public IPTribeMemberDisconnectBatch(TransformiceByteBuf in) {
         game = in.readInt();
-        ids = in.readList(in.readShort(), in::readInt);
-    }
-
-    public int getGame() {
-        return game;
-    }
-
-    public List<Integer> getIds() {
-        return ids;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("game", game)
-                .add("ids", ids)
-                .toString();
+        memberIds = in.readList(in.readShort(), in::readInt);
     }
 }
