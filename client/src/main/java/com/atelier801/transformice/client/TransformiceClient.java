@@ -664,7 +664,7 @@ public final class TransformiceClient implements Transformice {
             emitNext(new RoomRoundEvent());
         });
 
-        putPacketHandler(IPRoomMouse.class, p -> {
+        putPacketHandler(IPRoomMouseJoin.class, p -> {
             if (room.mice.getValid(p.getMouse().getId()) == null) {
                 emitNext(new RoomMouseJoinEvent(room.mice.replace(p.getMouse())));
             }
