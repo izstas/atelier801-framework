@@ -9,8 +9,8 @@ import com.google.common.collect.Iterables;
 // Valid for 1.252
 @Getter @ToString
 public final class DOutfitItem {
-    private static final Splitter splitter = Splitter.on('+');
-    private static final Splitter colorsSplitter = Splitter.on(',');
+    private static final Splitter splitter = Splitter.on('_');
+    private static final Splitter colorsSplitter = Splitter.on('+');
 
     private final int item;
     private final List<Integer> colors;
