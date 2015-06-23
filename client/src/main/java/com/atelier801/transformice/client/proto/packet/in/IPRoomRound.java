@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.201
+// Valid for 1.252 - needs refactoring
 @InboundPacket.Code(major = 5, minor = 2)
 public final class IPRoomRound implements InboundPacket {
     private final int mapId;
@@ -17,7 +17,7 @@ public final class IPRoomRound implements InboundPacket {
         mapId = in.readInt();
         in.readShort(); // Number of mice
         id = in.readByte();
-        mapXml = in.readUTF();
+        mapXml = in.readCompressedUTF();
         mapAuthor = in.readUTF();
         mapCategory = in.readByte();
     }

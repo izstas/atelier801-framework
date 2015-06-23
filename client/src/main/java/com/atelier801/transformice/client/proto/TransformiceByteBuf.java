@@ -1,12 +1,18 @@
 package com.atelier801.transformice.client.proto;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.zip.InflaterInputStream;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.WrappedByteBuf;
+import io.netty.handler.codec.DecoderException;
 import io.netty.util.CharsetUtil;
 
 public class TransformiceByteBuf extends WrappedByteBuf {
@@ -40,6 +46,26 @@ public class TransformiceByteBuf extends WrappedByteBuf {
         readBytes(data);
 
         return new String(data, 0, Bytes.indexOf(data, (byte) 0), CharsetUtil.UTF_8);
+    }
+
+    public String readCompressedUTF() {
+        int length = readUnsignedShort();
+        if (length == 0) {
+            return "";
+        }
+        if (length < 0) {
+            throw new DecoderException("can't read compressed UTF - length is negative (" + length + ")");
+        }
+
+        byte[] data;
+        try (InputStream dataIn = new InflaterInputStream(new ByteBufInputStream(this, length))) {
+            data = ByteStreams.toByteArray(dataIn);
+        }
+        catch (IOException e) {
+            throw new DecoderException("can't decompress compressed UTF", e);
+        }
+
+        return new String(data, CharsetUtil.UTF_8);
     }
 
     public <T> List<T> readList(int length, Function<TransformiceByteBuf, T> reader) {
