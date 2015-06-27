@@ -34,7 +34,7 @@ public final class IPRoomMouseMove implements InboundPacket {
         jumpingType = in.readByte();
         usedPortal = in.readByte();
 
-        if (in.isReadable(4)) {
+        if (in.isReadable()) {
             rot = readScaled(in);
             velRot = readScaled(in);
         }
