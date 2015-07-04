@@ -37,6 +37,11 @@ final class TribeMemberImpl implements TribeMember, Pooled<DTribeMember> {
     }
 
     @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
     public String getName() {
         return name;
     }

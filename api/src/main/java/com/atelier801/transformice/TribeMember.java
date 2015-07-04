@@ -12,6 +12,7 @@ import com.atelier801.transformice.event.TribeMemberRankChangeEvent;
  * Represents a tribe member.
  */
 public interface TribeMember {
+    int getId();
     String getName();
     TribeRank getRank();
     Instant getJoiningTime();
