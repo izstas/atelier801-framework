@@ -35,6 +35,8 @@ public interface Transformice {
         Collection<TribeRank> getRanks();
         Collection<TribeMember> getMembers();
 
+        TribeMember getClientMember();
+
         Observable<RoomChangeEvent> enterHouse();
     }
 

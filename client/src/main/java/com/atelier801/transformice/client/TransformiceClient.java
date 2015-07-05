@@ -142,6 +142,7 @@ public final class TransformiceClient implements Transformice {
     /* POST-LOGIN */
     private int clientMouseId;
     private String clientMouseName;
+    private int clientTribulleId;
 
     @Override
     public String getClientMouseName() {
@@ -280,6 +281,14 @@ public final class TransformiceClient implements Transformice {
             checkState(id != -1, "Not in tribe");
 
             return (Collection) members.valid();
+        }
+
+        @Override
+        public TribeMember getClientMember() {
+            checkState(state == State.LOGGED_IN, "Illegal state: %s", state);
+            checkState(id != -1, "Not in tribe");
+
+            return members.getValid(clientTribulleId);
         }
 
         @Override
@@ -450,6 +459,10 @@ public final class TransformiceClient implements Transformice {
             logger.info("Failed to log in: {} (#{})", r, p.getReason());
             emitNext(new StateChangeEvent(state = State.CONNECTED));
             emitNext(new LoginFailureEvent(r));
+        });
+
+        putPacketHandler(IPTribulle.class, p -> {
+            clientTribulleId = p.getId();
         });
 
         putPacketHandler(IPSatellite.class, p -> {

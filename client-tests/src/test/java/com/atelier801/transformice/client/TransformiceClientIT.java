@@ -87,9 +87,9 @@ public class TransformiceClientIT {
 
     @Test(dependsOnMethods = "testInitialTribeRanks")
     public void testInitialTribeMembers() throws Exception {
-        testTribeMember0 = tfm.tribe().getMembers().stream()
-                .filter(m -> m.getName().equals(username)).findAny().orElse(null);
+        testTribeMember0 = tfm.tribe().getClientMember();
         assertNotNull(testTribeMember0, "testTribeMember0");
+        assertEquals(testTribeMember0.getName(), username, "testTribeMember0.getName");
 
         testTribeMember1 = tfm.tribe().getMembers().stream()
                 .filter(m -> m.getRank() == testTribeRank1 || m.getRank() == testTribeRank2).findAny().orElse(null);

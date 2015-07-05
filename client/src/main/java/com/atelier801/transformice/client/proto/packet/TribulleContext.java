@@ -14,11 +14,8 @@ public final class TribulleContext {
 
     public OutboundReferencedTribullePacket getReferencedPacket(int referenceId) {
         Reference reference = references[referenceId % references.length];
-        if (reference == null) {
-            throw new IllegalStateException(String.format("reference #%d does not exist", referenceId));
-        }
-        if (reference.id != referenceId) {
-            throw new IllegalStateException(String.format("reference #%d is no longer available", referenceId));
+        if (reference == null || reference.id != referenceId) {
+            return null;
         }
 
         references[referenceId % references.length] = null;
