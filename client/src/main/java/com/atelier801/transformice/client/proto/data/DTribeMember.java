@@ -4,7 +4,7 @@ import lombok.*;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.247
+// Valid for 1.263
 @Getter @ToString
 public final class DTribeMember {
     private final int id;
@@ -18,7 +18,7 @@ public final class DTribeMember {
     public DTribeMember(TransformiceByteBuf in) {
         id = in.readInt();
         in.readInt();
-        name = in.readUTFBytes(20);
+        name = in.readUTF();
         rankId = in.readInt();
         joiningTime = in.readInt();
         lastConnectionTime = in.readInt();

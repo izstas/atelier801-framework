@@ -1,11 +1,12 @@
 package com.atelier801.transformice.client.proto.packet.in;
 
-import com.google.common.base.MoreObjects;
+import lombok.*;
 
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 
-// Valid for 1.180
+// Valid for 1.263
 @InboundTribullePacket.Label("ET_SignaleChangementRang")
+@Getter @ToString
 public final class IPTribeMemberRank implements InboundTribullePacket {
     private final int id;
     private final int rankId;
@@ -14,22 +15,6 @@ public final class IPTribeMemberRank implements InboundTribullePacket {
         id = in.readInt();
         in.readUTF();
         rankId = in.readInt();
-        in.readUTFBytes(20);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public int getRankId() {
-        return rankId;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("rankId", rankId)
-                .toString();
+        in.readUTF();
     }
 }

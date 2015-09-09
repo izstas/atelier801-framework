@@ -5,7 +5,7 @@ import lombok.*;
 import com.atelier801.transformice.client.proto.TransformiceByteBuf;
 import com.atelier801.transformice.client.proto.packet.out.OPTribulleRequest;
 
-// Valid for 1.255
+// Valid for 1.263
 @InboundTribullePacket.Label("ET_ReponseDemandeInfosJeuUtilisateur")
 @Getter @ToString
 public final class IPTribulle extends InboundReferencingTribullePacket<OPTribulleRequest> {
@@ -17,6 +17,6 @@ public final class IPTribulle extends InboundReferencingTribullePacket<OPTribull
         in.readInt();
         in.readInt();
         in.readInt();
-        in.readUTFBytes(20);
+        in.readUTF();
     }
 }
